@@ -1,23 +1,23 @@
-import logo from './logo.svg';
+import { useState } from 'react';
+import ReactQuill from 'react-quill';
 import './App.css';
+import 'react-quill/dist/quill.bubble.css';
 
 function App() {
+  const [value, setValue] = useState('');
+
+  function saveContent() {
+    console.log(value);
+  }
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+        <div className="toolbar">
+            <div className="toolbarButton" onClick={saveContent}>Spara</div>
+        </div>
+      <div className="editorContainer">
+        <ReactQuill theme="bubble" value={value} onChange={setValue}/>
+      </div>
     </div>
   );
 }
