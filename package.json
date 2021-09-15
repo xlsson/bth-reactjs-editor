@@ -18,7 +18,9 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "deploy": "npm run build && rsync -av --delete build/ riax20@ssh.student.bth.se:www/editor"
+    "deploy": "npm run build && rsync -av --delete build/ riax20@ssh.student.bth.se:www/editor",
+    "clean": "rm -rf node_modules/ package-lock.json",
+    "clean-tests": "npm run clean && npm install && npm test"
   },
   "eslintConfig": {
     "extends": [

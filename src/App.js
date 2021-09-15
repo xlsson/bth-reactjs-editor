@@ -2,7 +2,7 @@ import React from 'react';
 import ReactQuill from 'react-quill';
 import ToolbarButton from './components/ToolbarButton.js';
 import TextInputField from './components/TextInputField.js';
-import RadioButton from './components/RadioButton.js';
+import DropDown from './components/DropDown.js';
 import backend from './functions/Backend.js';
 
 import './App.css';
@@ -18,7 +18,7 @@ class App extends React.Component {
             currentContent: '',
             selectedDocId: '',
             allDocuments: [],
-            latestMessage: ''
+            latestMessage: 'Ready to create a new document.'
         };
 
         this.contentChange = this.contentChange.bind(this);
@@ -86,7 +86,7 @@ class App extends React.Component {
         });
     }
 
-    handleSelectRadio = (documentid) => {
+    handleDropDownChange = (documentid) => {
         this.setState({
             selectedDocId: documentid
         });
@@ -155,11 +155,18 @@ class App extends React.Component {
                         label="Save"
                         onClick={() => this.handleClick("save")} />
                     <ToolbarButton
-                        label="Clear (start new document)"
+                        label="Clear (new document)"
                         onClick={() => this.handleClick("clear")} />
+                    <p>Load document:</p>
+                    <DropDown
+                        docList={this.state.allDocuments}
+                        onChange={this.handleDropDownChange}/>
+                    <ToolbarButton
+                        label="Load"
+                        onClick={() => this.handleClick("open")} />
                 </div>
                 <div className="messageBox">
-                    Status message: <strong>{this.state.latestMessage}</strong>
+                    <strong>{this.state.latestMessage}</strong>
                 </div>
                 <div className="editorContainer">
                     <ReactQuill
@@ -167,19 +174,6 @@ class App extends React.Component {
                     value={this.state.currentContent}
                     onChange={(ev) => this.contentChange(ev)}/>
                 </div>
-                <strong>Documents in collection:</strong>
-                <div className="radioWrapper">
-                    {this.state.allDocuments.map((document, i) => (
-                        <RadioButton
-                            key={i}
-                            id={document._id}
-                            filename={document.filename}
-                            onClick={() => this.handleSelectRadio(document._id)} />
-                    ))}
-                </div>
-                <ToolbarButton
-                    label="Load selected document"
-                    onClick={() => this.handleClick("open")} />
             </div>
         );
     }
