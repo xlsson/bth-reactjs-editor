@@ -1,5 +1,4 @@
 import React from 'react';
-import '../App.css';
 
 class TextInputField extends React.Component {
     constructor(props) {
