@@ -11,6 +11,9 @@ import 'react-quill/dist/quill.bubble.css';
 class App extends React.Component {
     constructor(props) {
         super(props);
+
+        this._isMounted = false;
+
         this.state = {
             currentId: '',
             currentFilename: '',
@@ -28,9 +31,11 @@ class App extends React.Component {
     }
 
     afterReadAll = (data) => {
-        this.setState({
-            allDocuments: data
-        });
+        if (this._isMounted) {
+            this.setState({
+                allDocuments: data
+            });
+        }
     }
 
     afterReadOne = (data) => {
@@ -186,8 +191,14 @@ class App extends React.Component {
     }
 
     componentDidMount = () => {
-        console.log("in componentDidMount");
-        backend("readall", this.afterReadAll);
+        this._isMounted = true;
+        if (this._isMounted) {
+            backend("readall", this.afterReadAll);
+        }
+    }
+
+    componentWillUnmount = () => {
+       this._isMounted = false;
     }
 }
 
