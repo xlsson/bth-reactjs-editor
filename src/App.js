@@ -50,6 +50,7 @@ class App extends React.Component {
                 currentId: data[0].insertedId,
                 latestMessage: "Saved new document in database."
             });
+            console.log("in afterCreateDoc");
             backend("readall", this.afterReadAll);
             return;
         }
@@ -140,28 +141,34 @@ class App extends React.Component {
             <div className="App">
                 <div className="toolbar">
                     <TextInputField
+                        elementId="titleInputField"
                         label="Document title: "
                         name="titleTitle"
                         value={this.state.currentTitle}
                         id={this.state.currentId}
                         onChange={this.handleTitleChange}/>
                     <TextInputField
+                        elementId="filenameInputField"
                         label="Filename (must be unique): "
                         name="titleFilename"
                         value={this.state.currentFilename}
                         id={this.state.currentId}
                         onChange={this.handleFilenameChange}/>
                     <ToolbarButton
+                        elementId="buttonSave"
                         label="Save"
                         onClick={() => this.handleClick("save")} />
                     <ToolbarButton
+                        elementId="buttonClear"
                         label="Clear (new document)"
                         onClick={() => this.handleClick("clear")} />
                     <p>Load document:</p>
                     <DropDown
+                        elementId="fileDropdown"
                         docList={this.state.allDocuments}
                         onChange={this.handleDropDownChange}/>
                     <ToolbarButton
+                        elementId="buttonLoad"
                         label="Load"
                         onClick={() => this.handleClick("open")} />
                 </div>
@@ -179,6 +186,7 @@ class App extends React.Component {
     }
 
     componentDidMount = () => {
+        console.log("in componentDidMount");
         backend("readall", this.afterReadAll);
     }
 }

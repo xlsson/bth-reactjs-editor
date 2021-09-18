@@ -19,6 +19,7 @@ class TextInputField extends React.Component {
             <div>
                 <label htmlFor={this.props.name}>{this.props.label}</label>
                 <input
+                    id={this.props.elementId}
                     type="text"
                     name={this.props.name}
                     value={this.props.value}

@@ -12,7 +12,7 @@ class DropDown extends React.Component {
 
     render() {
         return (
-                <select name="selectedDocId" onChange={this.handleChange}>
+                <select id={this.props.elementId} onChange={this.handleChange}>
                     {this.props.docList.map((document, i) => (
                         <option
                             key={i}
