@@ -24,7 +24,7 @@ class App extends React.Component {
             latestMessage: 'Ready to create a new document.'
         };
 
-        this.contentChange = this.contentChange.bind(this);
+        this.handleContentChange = this.handleContentChange.bind(this);
         this.handleTitleChange = this.handleTitleChange.bind(this);
         this.handleFilenameChange = this.handleFilenameChange.bind(this);
         this.handleClick = this.handleClick.bind(this);
@@ -86,7 +86,7 @@ class App extends React.Component {
         });
     }
 
-    contentChange = (ev) => {
+    handleContentChange = (ev) => {
         this.setState({
             currentContent: ev
         });
@@ -184,7 +184,7 @@ class App extends React.Component {
                     <ReactQuill
                     theme="bubble"
                     value={this.state.currentContent}
-                    onChange={(ev) => this.contentChange(ev)}/>
+                    onChange={(ev) => this.handleContentChange(ev)}/>
                 </div>
             </div>
         );
