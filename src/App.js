@@ -4,15 +4,21 @@ import ToolbarButton from './components/ToolbarButton.js';
 import TextInputField from './components/TextInputField.js';
 import DropDown from './components/DropDown.js';
 import backend from './functions/Backend.js';
+import socketIOClient from "socket.io-client";
 
 import './App.css';
 import 'react-quill/dist/quill.bubble.css';
+
+const ENDPOINT = "http://localhost:1234";
+const socket = socketIOClient(ENDPOINT);
 
 class App extends React.Component {
     constructor(props) {
         super(props);
 
         this._isMounted = false;
+
+        this._wasWrittenLocally = true;
 
         this.state = {
             currentId: '',
@@ -40,6 +46,8 @@ class App extends React.Component {
 
     afterReadOne = (data) => {
         let doc = data[0];
+
+        this.switchRoom(doc._id);
         this.setState({
             currentId: doc._id,
             currentFilename: doc.filename,
@@ -50,12 +58,15 @@ class App extends React.Component {
     }
 
     afterCreateDoc = (data) => {
-        if (data[0].exists === "false") {
+        let doc = data[0];
+
+        if (doc.exists === "false") {
+            this.switchRoom(doc.insertedId);
             this.setState({
-                currentId: data[0].insertedId,
+                currentId: doc.insertedId,
                 latestMessage: "Saved new document in database."
             });
-            console.log("in afterCreateDoc");
+
             backend("readall", this.afterReadAll);
             return;
         }
@@ -87,9 +98,19 @@ class App extends React.Component {
     }
 
     handleContentChange = (ev) => {
-        this.setState({
-            currentContent: ev
-        });
+        if (this._wasWrittenLocally) {
+            this.setState({
+                currentContent: ev
+            });
+            if (this.state.currentId.length > 0) {
+                let data = {
+                    room: this.state.currentId,
+                    content: ev
+                };
+                socket.emit("sendContent", data);
+            }
+        }
+        this._wasWrittenLocally = true;
     }
 
     handleDropDownChange = (documentid) => {
@@ -139,6 +160,11 @@ class App extends React.Component {
             );
             return;
         }
+    }
+
+    switchRoom = (newRoom) => {
+        socket.emit("leave", this.state.currentId);
+        socket.emit("join", newRoom);
     }
 
     render() {
@@ -194,6 +220,15 @@ class App extends React.Component {
         this._isMounted = true;
         if (this._isMounted) {
             backend("readall", this.afterReadAll);
+
+            socket.on('connect', () => {
+                socket.on('sendContent', (content) => {
+                    this._wasWrittenLocally = false;
+                    this.setState({
+                        currentContent: content
+                    });
+                });
+            });
         }
     }
 
