@@ -42,6 +42,11 @@ class App extends React.Component {
                 allDocuments: data
             });
         }
+        if (this.state.allDocuments.length > 0) {
+            this.setState({
+                selectedDocId: this.state.allDocuments[0]._id
+            });
+        }
     }
 
     afterReadOne = (data) => {
@@ -143,6 +148,7 @@ class App extends React.Component {
         }
 
         if (action === "clear") {
+            socket.emit("leave", this.state.currentId);
             this.setState({
                 currentId: '',
                 currentFilename: '',
