@@ -9,7 +9,7 @@ import socketIOClient from "socket.io-client";
 import './App.css';
 import 'react-quill/dist/quill.bubble.css';
 
-const ENDPOINT = "http://localhost:1234";
+const ENDPOINT = "https://jsramverk-editor-riax20.azurewebsites.net/";
 const socket = socketIOClient(ENDPOINT);
 
 class App extends React.Component {
