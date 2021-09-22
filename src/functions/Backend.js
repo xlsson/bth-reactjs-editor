@@ -1,6 +1,6 @@
 function backend(request, callback, params = {}) {
-    const baseUrl = 'http://localhost:1234'
-    // const baseUrl = 'https://jsramverk-editor-riax20.azurewebsites.net'
+    // const baseUrl = 'http://localhost:1234'
+    const baseUrl = 'https://jsramverk-editor-riax20.azurewebsites.net'
     let url;
 
     if (request === "readall") {
