@@ -9,7 +9,7 @@ import socketIOClient from "socket.io-client";
 import './App.css';
 import 'react-quill/dist/quill.bubble.css';
 
-const ENDPOINT = "https://jsramverk-editor-riax20.azurewebsites.net";
+const ENDPOINT = "http://localhost:1234";
 const socket = socketIOClient(ENDPOINT);
 
 class App extends React.Component {
@@ -18,7 +18,7 @@ class App extends React.Component {
 
         this._isMounted = false;
 
-        this._wasWrittenLocally = true;
+        this._isFromRemote = false;
 
         this.state = {
             currentId: '',
@@ -30,9 +30,7 @@ class App extends React.Component {
             latestMessage: 'Ready to create a new document.'
         };
 
-        this.handleContentChange = this.handleContentChange.bind(this);
-        this.handleTitleChange = this.handleTitleChange.bind(this);
-        this.handleFilenameChange = this.handleFilenameChange.bind(this);
+        this.handleTextInputChange = this.handleTextInputChange.bind(this);
         this.handleClick = this.handleClick.bind(this);
     }
 
@@ -58,7 +56,7 @@ class App extends React.Component {
             currentFilename: doc.filename,
             currentTitle: doc.title,
             currentContent: doc.content,
-            latestMessage: `Loaded document "${doc.filename}"`
+            latestMessage: `Loaded document "${doc.filename}" from database.`
         });
     }
 
@@ -69,10 +67,10 @@ class App extends React.Component {
             this.switchRoom(doc.insertedId);
             this.setState({
                 currentId: doc.insertedId,
-                latestMessage: "Saved new document in database."
+                latestMessage: "Document saved to database."
             });
 
-            backend("readall", this.afterReadAll);
+            backend("readall", ENDPOINT, this.afterReadAll);
             return;
         }
 
@@ -84,38 +82,38 @@ class App extends React.Component {
     }
 
     afterUpdate = (data) => {
-        this.setState({
-            latestMessage: "Saved document changes in database."
-        });
+        this.setState({ latestMessage: "Changes saved to database." });
         return;
     }
 
-    handleTitleChange = (ev) => {
-        this.setState({
-            currentTitle: ev
-        });
-    }
+    handleTextInputChange = (ev, fieldName) => {
+        let data = {};
 
-    handleFilenameChange = (ev) => {
-        this.setState({
-            currentFilename: ev
-        });
-    }
-
-    handleContentChange = (ev) => {
-        if (this._wasWrittenLocally) {
-            this.setState({
-                currentContent: ev
-            });
-            if (this.state.currentId.length > 0) {
-                let data = {
-                    room: this.state.currentId,
-                    content: ev
-                };
-                socket.emit("sendContent", data);
-            }
+        if (this._isFromRemote) {
+            this._isFromRemote = false;
+            return;
         }
-        this._wasWrittenLocally = true;
+
+        if (fieldName === "docInfoFilename") {
+            this.setState({ currentFilename: ev });
+            return;
+        }
+
+        if (fieldName === "content") {
+            this.setState({ currentContent: ev });
+            data.title = this.state.currentTitle;
+            data.content = ev;
+        } else if (fieldName === "docInfoTitle") {
+            this.setState({ currentTitle: ev });
+            data.title = ev;
+            data.content = this.state.currentContent;
+        }
+
+        if (this.state.currentId.length === 0) { return; }
+
+        data.room = this.state.currentId;
+        socket.emit("send", data);
+        return;
     }
 
     handleDropDownChange = (documentid) => {
@@ -126,7 +124,9 @@ class App extends React.Component {
 
     handleClick = (action) => {
         if ((action === "save") && (this.state.currentId.length === 0)) {
-            backend("create",
+            backend(
+                "create",
+                ENDPOINT,
                 this.afterCreateDoc, {
                     filename: this.state.currentFilename,
                     title: this.state.currentTitle,
@@ -137,7 +137,9 @@ class App extends React.Component {
         }
 
         if ((action === "save") && (this.state.currentId.length > 0)) {
-            backend("update",
+            backend(
+                "update",
+                ENDPOINT,
                 this.afterUpdate, {
                     docid: this.state.currentId,
                     title: this.state.currentTitle,
@@ -159,8 +161,10 @@ class App extends React.Component {
             return;
         }
 
-        if (action === "open") {
-            backend("open",
+        if (action === "load") {
+            backend(
+                "readone",
+                ENDPOINT,
                 this.afterReadOne,
                 { id: this.state.selectedDocId }
             );
@@ -180,17 +184,17 @@ class App extends React.Component {
                     <TextInputField
                         elementId="titleInputField"
                         label="Document title: "
-                        name="titleTitle"
+                        name="docInfoTitle"
                         value={this.state.currentTitle}
                         id={this.state.currentId}
-                        onChange={this.handleTitleChange}/>
+                        onChange={this.handleTextInputChange}/>
                     <TextInputField
                         elementId="filenameInputField"
                         label="Filename (must be unique): "
-                        name="titleFilename"
+                        name="docInfoFilename"
                         value={this.state.currentFilename}
                         id={this.state.currentId}
-                        onChange={this.handleFilenameChange}/>
+                        onChange={this.handleTextInputChange}/>
                     <ToolbarButton
                         elementId="buttonSave"
                         label="Save"
@@ -207,7 +211,7 @@ class App extends React.Component {
                     <ToolbarButton
                         elementId="buttonLoad"
                         label="Load"
-                        onClick={() => this.handleClick("open")} />
+                        onClick={() => this.handleClick("load")} />
                 </div>
                 <div className="messageBox">
                     <strong>{this.state.latestMessage}</strong>
@@ -216,7 +220,7 @@ class App extends React.Component {
                     <ReactQuill
                     theme="bubble"
                     value={this.state.currentContent}
-                    onChange={(ev) => this.handleContentChange(ev)}/>
+                    onChange={(ev) => this.handleTextInputChange(ev, "content")}/>
                 </div>
             </div>
         );
@@ -225,13 +229,18 @@ class App extends React.Component {
     componentDidMount = () => {
         this._isMounted = true;
         if (this._isMounted) {
-            backend("readall", this.afterReadAll);
+            backend(
+                "readall",
+                ENDPOINT,
+                this.afterReadAll
+            );
 
             socket.on('connect', () => {
-                socket.on('sendContent', (content) => {
-                    this._wasWrittenLocally = false;
+                socket.on('send', (data) => {
+                    this._isFromRemote = true;
                     this.setState({
-                        currentContent: content
+                        currentTitle: data.title,
+                        currentContent: data.content
                     });
                 });
             });
