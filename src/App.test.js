@@ -5,7 +5,7 @@ import App from './App';
 test('User clicking Clear button displays expected message', async () => {
   render(<App />);
 
-  userEvent.click(screen.getByText('Clear (new document)'));
+  userEvent.click(screen.getByText('NEW (CLEAR)'));
 
   await waitFor(() => screen.getByText(/Cleared. Ready to create a new document./));
 
