@@ -12,16 +12,18 @@ class DropDown extends React.Component {
 
     render() {
         return (
-                <select id={this.props.elementId} onChange={this.handleChange}>
-                    {this.props.docList.map((document, i) => (
-                        <option
-                            key={i}
-                            value={document._id}>
-                                {document.filename}
-                            </option>
-                    ))}
-                </select>
-
+                <div className="flex-column">
+                    <p className="field-title">{this.props.title}</p>
+                    <select id={this.props.elementId} onChange={this.handleChange}>
+                        {this.props.docList.map((document, i) => (
+                            <option
+                                key={i}
+                                value={document._id}>
+                                    {document.filename}
+                                </option>
+                        ))}
+                    </select>
+                </div>
         );
     }
 }

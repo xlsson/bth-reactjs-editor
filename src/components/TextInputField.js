@@ -16,8 +16,8 @@ class TextInputField extends React.Component {
             disabled = true;
         }
         return (
-            <div>
-                <label htmlFor={this.props.name}>{this.props.label}</label>
+            <div className="flex-column">
+                <label className="field-title" htmlFor={this.props.name}>{this.props.label}</label>
                 <input
                     id={this.props.elementId}
                     type="text"

@@ -1,12 +1,12 @@
 import React from 'react';
 import ReactQuill from 'react-quill';
-import ToolbarButton from './components/ToolbarButton.js';
-import TextInputField from './components/TextInputField.js';
 import DropDown from './components/DropDown.js';
+import HeaderIcon from './components/HeaderIcon.js';
+import TextInputField from './components/TextInputField.js';
+import ToolbarButton from './components/ToolbarButton.js';
 import backend from './functions/Backend.js';
 import socketIOClient from "socket.io-client";
 
-import './App.css';
 import 'react-quill/dist/quill.bubble.css';
 
 const ENDPOINT = "https://jsramverk-editor-riax20.azurewebsites.net/";
@@ -177,50 +177,114 @@ class App extends React.Component {
         socket.emit("join", newRoom);
     }
 
+    handleLoginout = () => {
+        console.log("loginout");
+    }
+
+    handlePdf = () => {
+        console.log("handlePdf");
+    }
+
+    handleCode = () => {
+        console.log("handleCode");
+    }
+
+    handleShare = () => {
+        console.log("handleShare");
+    }
+
+    handleComment = () => {
+        console.log("handleComment");
+    }
+
     render() {
         return (
             <div className="App">
+                <>
+                <ul className="flex-row header-menu">
+                    <>
+                    <HeaderIcon
+                        elementId="commenticon"
+                        icon="comment_bank"
+                        label="New"
+                        onClick={this.handleComment}/>
+                    <HeaderIcon
+                        elementId="shareicon"
+                        icon="group_add"
+                        label="Share"
+                        onClick={this.handleShare}/>
+                    <HeaderIcon
+                        elementId="codeicon"
+                        icon="code"
+                        label="Code"
+                        onClick={this.handleCode}/>
+                    <HeaderIcon
+                        elementId="pdficon"
+                        icon="print"
+                        label="PDF"
+                        onClick={this.handlePdf}/>
+                    <HeaderIcon
+                        elementId="accounticon"
+                        icon="account_circle"
+                        label="Login"
+                        onClick={this.handleLoginout}/>
+                    </>
+                </ul>
                 <div className="toolbar">
+                    <>
                     <TextInputField
                         elementId="titleInputField"
-                        label="Document title: "
+                        label="Document title"
                         name="docInfoTitle"
                         value={this.state.currentTitle}
                         id={this.state.currentId}
                         onChange={this.handleTextInputChange}/>
-                    <TextInputField
-                        elementId="filenameInputField"
-                        label="Filename (must be unique): "
-                        name="docInfoFilename"
-                        value={this.state.currentFilename}
-                        id={this.state.currentId}
-                        onChange={this.handleTextInputChange}/>
-                    <ToolbarButton
-                        elementId="buttonSave"
-                        label="Save"
-                        onClick={() => this.handleClick("save")} />
-                    <ToolbarButton
-                        elementId="buttonClear"
-                        label="Clear (new document)"
-                        onClick={() => this.handleClick("clear")} />
-                    <p>Load document:</p>
-                    <DropDown
-                        elementId="fileDropdown"
-                        docList={this.state.allDocuments}
-                        onChange={this.handleDropDownChange}/>
-                    <ToolbarButton
-                        elementId="buttonLoad"
-                        label="Load"
-                        onClick={() => this.handleClick("load")} />
-                </div>
-                <div className="messageBox">
-                    <strong>{this.state.latestMessage}</strong>
+                    <div className="flex-row align-items-end">
+                        <TextInputField
+                            elementId="filenameInputField"
+                            label="Filename (must be unique)"
+                            name="docInfoFilename"
+                            value={this.state.currentFilename}
+                            id={this.state.currentId}
+                            onChange={this.handleTextInputChange}/>
+                        <ToolbarButton
+                            classes="red"
+                            elementId="buttonSave"
+                            label="SAVE"
+                            onClick={() => this.handleClick("save")} />
+                    </div>
+                    </>
                 </div>
                 <div className="editorContainer">
                     <ReactQuill
                     theme="bubble"
                     value={this.state.currentContent}
                     onChange={(ev) => this.handleTextInputChange(ev, "content")}/>
+                </div>
+                <div className="toolbar">
+                    <>
+                    <ToolbarButton
+                        classes="lighter"
+                        elementId="buttonClear"
+                        label="NEW (CLEAR)"
+                        onClick={() => this.handleClick("clear")} />
+                    <div className="flex-row align-items-end">
+                        <DropDown
+                            title="Load document"
+                            elementId="fileDropdown"
+                            docList={this.state.allDocuments}
+                            onChange={this.handleDropDownChange}/>
+                        <ToolbarButton
+                            classes=""
+                            elementId="buttonLoad"
+                            label="LOAD"
+                            onClick={() => this.handleClick("load")} />
+                    </div>
+                    </>
+                </div>
+                </>
+                <div className="message-box">
+                    >>> {this.state.latestMessage}
                 </div>
             </div>
         );
