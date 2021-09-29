@@ -1,7 +1,9 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import ReactQuill from 'react-quill';
 import DropDown from './components/DropDown.js';
 import HeaderIcon from './components/HeaderIcon.js';
+import LoginModal from './components/LoginModal.js';
 import TextInputField from './components/TextInputField.js';
 import ToolbarButton from './components/ToolbarButton.js';
 import backend from './functions/Backend.js';
@@ -177,8 +179,18 @@ class App extends React.Component {
         socket.emit("join", newRoom);
     }
 
-    handleLoginout = () => {
-        console.log("loginout");
+    toggleLoginModal = (action) => {
+        if (action === "open") {
+            ReactDOM.render(
+                <LoginModal
+                    onClick={this.toggleLoginModal}/>,
+                document.getElementById('login-modal')
+            );
+            return;
+        }
+        ReactDOM.unmountComponentAtNode(
+            document.getElementById('login-modal')
+        );
     }
 
     handlePdf = () => {
@@ -201,44 +213,75 @@ class App extends React.Component {
         return (
             <div className="App">
                 <>
-                <ul className="flex-row header-menu">
+                <div className="flex-row header-wrapper">
                     <>
-                    <HeaderIcon
-                        elementId="commenticon"
-                        icon="comment_bank"
-                        label="New"
-                        onClick={this.handleComment}/>
-                    <HeaderIcon
-                        elementId="shareicon"
-                        icon="group_add"
-                        label="Share"
-                        onClick={this.handleShare}/>
-                    <HeaderIcon
-                        elementId="codeicon"
-                        icon="code"
-                        label="Code"
-                        onClick={this.handleCode}/>
-                    <HeaderIcon
-                        elementId="pdficon"
-                        icon="print"
-                        label="PDF"
-                        onClick={this.handlePdf}/>
-                    <HeaderIcon
-                        elementId="accounticon"
-                        icon="account_circle"
-                        label="Login"
-                        onClick={this.handleLoginout}/>
+                    <ul className="flex-row header-menu">
+                        <>
+                        <HeaderIcon
+                            elementId="commenticon"
+                            icon="comment_bank"
+                            label="Comment"
+                            onClick={this.handleComment}/>
+                        <HeaderIcon
+                            elementId="shareicon"
+                            icon="group_add"
+                            label="Share"
+                            onClick={this.handleShare}/>
+                        <HeaderIcon
+                            elementId="codeicon"
+                            icon="code"
+                            label="Code"
+                            onClick={this.handleCode}/>
+                        <HeaderIcon
+                            elementId="pdficon"
+                            icon="print"
+                            label="PDF"
+                            onClick={this.handlePdf}/>
+                        </>
+                    </ul>
+                    <div className="flex-row align-items-end">
+                        <>
+                        <DropDown
+                            title="Open a document"
+                            elementId="fileDropdown"
+                            docList={this.state.allDocuments}
+                            onChange={this.handleDropDownChange}/>
+                        <ToolbarButton
+                            classes=""
+                            elementId="buttonLoad"
+                            label="OPEN"
+                            onClick={() => this.handleClick("load")} />
+                        </>
+                    </div>
+                    <ul className="flex-row header-menu">
+                        <HeaderIcon
+                            elementId="accounticon"
+                            icon="account_circle"
+                            label="Login"
+                            onClick={() => this.toggleLoginModal("open")}/>
+                    </ul>
                     </>
-                </ul>
+                </div>
+                <TextInputField
+                    elementId="titleInputField"
+                    label="Title"
+                    name="docInfoTitle"
+                    value={this.state.currentTitle}
+                    id={this.state.currentId}
+                    onChange={this.handleTextInputChange}/>
+                <div className="editorContainer">
+                    <ReactQuill
+                    theme="bubble"
+                    value={this.state.currentContent}
+                    onChange={(ev) => this.handleTextInputChange(ev, "content")}/>
+                </div>
                 <div className="toolbar">
                     <>
-                    <TextInputField
-                        elementId="titleInputField"
-                        label="Document title"
-                        name="docInfoTitle"
-                        value={this.state.currentTitle}
-                        id={this.state.currentId}
-                        onChange={this.handleTextInputChange}/>
+                    <ToolbarButton
+                        classes="lighter"
+                        elementId="buttonClear"
+                        label="NEW (CLEAR)"
+                        onClick={() => this.handleClick("clear")} />
                     <div className="flex-row align-items-end">
                         <TextInputField
                             elementId="filenameInputField"
@@ -255,37 +298,11 @@ class App extends React.Component {
                     </div>
                     </>
                 </div>
-                <div className="editorContainer">
-                    <ReactQuill
-                    theme="bubble"
-                    value={this.state.currentContent}
-                    onChange={(ev) => this.handleTextInputChange(ev, "content")}/>
-                </div>
-                <div className="toolbar">
-                    <>
-                    <ToolbarButton
-                        classes="lighter"
-                        elementId="buttonClear"
-                        label="NEW (CLEAR)"
-                        onClick={() => this.handleClick("clear")} />
-                    <div className="flex-row align-items-end">
-                        <DropDown
-                            title="Load document"
-                            elementId="fileDropdown"
-                            docList={this.state.allDocuments}
-                            onChange={this.handleDropDownChange}/>
-                        <ToolbarButton
-                            classes=""
-                            elementId="buttonLoad"
-                            label="LOAD"
-                            onClick={() => this.handleClick("load")} />
-                    </div>
-                    </>
-                </div>
-                </>
                 <div className="message-box">
                     >>> {this.state.latestMessage}
                 </div>
+                <div id="login-modal"></div>
+                </>
             </div>
         );
     }

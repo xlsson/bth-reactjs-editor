@@ -7,7 +7,7 @@ body {
     margin: 0 auto;
     text-align: center;
     background-color: #eee;
-    min-height: 100vh;
+    min-height: 100%;
     max-width: 800px;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
         'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
@@ -40,27 +40,67 @@ body {
     margin: 0 1em;
 }
 
-.message-box {
-    font-family: "Courier New";
-    margin: 3em auto;
-    padding: 0.5em;
-    color: #0f0;
-    background-color: #000;
+#login-modal-background {
+    z-index: 100;
+    background-color: rgba(0,0,0,0.6);
+    height: 100%;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+.login-wrapper {
+    justify-content: center;
+}
+
+.login-box {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.3), 0 3px 10px 0 rgba(0,0,0,0.19);
+    padding: 1em;
+    background-color: #eee;
     border: 1px solid #ccc;
     border-radius: 4px;
+}
+
+.login-modal-buttons {
+    margin-top: 1em;
+    justify-content: space-between;
+}
+
+.message-box {
+    font-family: "Courier New";
+    font-style: italic;
+    margin: 4em auto 0;
+    padding: 0.5em;
+    color: #fff;
+    background-color: #333;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.header-wrapper {
+    margin: 0.5em 0;
+    justify-content: space-between;
 }
 
 .header-menu {
     justify-content: flex-end;
     list-style-type: none;
+    margin: 0;
     padding: 0;
-    margin: 0.5em 0 0;
     font-size: 1.5em;
 }
 
 .header-icon {
-    margin-left: 0.8em;
+    margin: 0 0 0 0.8em;
     cursor: pointer;
+}
+
+.header-icon:first-child {
+    margin: 0;
 }
 
 .header-icon-label {
@@ -98,6 +138,10 @@ body {
     align-items: flex-end;
 }
 
+.justify-flex-end {
+    justify-content: flex-end;
+}
+
 .field-title {
     font-size: 0.8em;
     font-weight: bold;
@@ -120,6 +164,13 @@ input {
 
 input:disabled {
     background-color: #eee;
+}
+
+#titleInputField {
+    font-size: 1.2em;
+    font-weight: bold;
+    padding: 0.6em 0.6em;
+    margin: 0;
 }
 
 .toolbarButton {
