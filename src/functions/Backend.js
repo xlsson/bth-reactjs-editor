@@ -2,26 +2,59 @@ function backend(request, baseUrl, callback, params = {}) {
     let url;
 
     if (request === "readall") {
-        url = `${baseUrl}/readall`;
+        url = `${baseUrl}/readall/${params.email}`;
         getRequest(url, callback);
         return;
     }
 
     if (request === "readone") {
-        url = `${baseUrl}/readone/${params.id}`;
+        url = `${baseUrl}/readone/${params.filename}`;
         getRequest(url, callback);
         return;
     }
 
     if (request === "create") {
         url = `${baseUrl}/createone`;
-        postRequest(url, callback, params);
+        const requestOptions = {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                filename: params.filename,
+                title: params.title,
+                content: params.content,
+                email: params.email
+             })
+        };
+        putRequest(url, callback, requestOptions);
         return;
     }
 
     if (request === "update") {
         url = `${baseUrl}/updateone`;
-        putRequest(url, callback, params);
+        const requestOptions = {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                filename: params.filename,
+                title: params.title,
+                content: params.content
+             })
+        };
+        putRequest(url, callback, requestOptions);
+        return;
+    }
+
+    if (request === "createuser") {
+        url = `${baseUrl}/createuser`;
+        const requestOptions = {
+            method: "POST",
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name: params.name,
+                email: params.email
+             })
+        };
+        postRequest(url, callback, requestOptions);
         return;
     }
 
@@ -37,33 +70,15 @@ function getRequest(url, callback) {
     });
 }
 
-function postRequest(url, callback, params) {
-    const requestOptions = {
-        method: "POST",
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            filename: params.filename,
-            title: params.title,
-            content: params.content
-         })
-    };
-
+function postRequest(url, callback, requestOptions) {
     fetch(url, requestOptions)
         .then(response => response.json())
         .then(function(data) {
             return callback(data);
         });
 }
-function putRequest(url, callback, params) {
-    const requestOptions = {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            docid: params.docid,
-            title: params.title,
-            content: params.content
-         })
-    };
+
+function putRequest(url, callback, requestOptions) {
     fetch(url, requestOptions)
         .then(function(data) {
             return callback(data);

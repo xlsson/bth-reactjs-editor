@@ -15,11 +15,11 @@ class DropDown extends React.Component {
                 <div className="flex-column">
                     <p className="field-title">{this.props.title}</p>
                     <select id={this.props.elementId} onChange={this.handleChange}>
-                        {this.props.docList.map((document, i) => (
+                        {this.props.availableFiles.map((filename, i) => (
                             <option
                                 key={i}
-                                value={document._id}>
-                                    {document.filename}
+                                value={filename}>
+                                    {filename}
                                 </option>
                         ))}
                     </select>

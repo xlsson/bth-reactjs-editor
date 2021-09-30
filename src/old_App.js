@@ -11,7 +11,7 @@ import socketIOClient from "socket.io-client";
 
 import 'react-quill/dist/quill.bubble.css';
 
-const ENDPOINT = "https://jsramverk-editor-riax20.azurewebsites.net";
+const ENDPOINT = "https://jsramverk-editor-riax20.azurewebsites.net/";
 const socket = socketIOClient(ENDPOINT);
 
 class App extends React.Component {
@@ -22,19 +22,13 @@ class App extends React.Component {
 
         this._isFromRemote = false;
 
-        this._isSaved = false;
-
         this.state = {
-            currentUser: 'richard.axelsson@gmail.com',
             currentId: '',
             currentFilename: '',
-            currentOwner: '',
-            currentOwnerEmail: '',
             currentTitle: '',
             currentContent: '',
-            currentAllowedUsers: [],
-            selectedFile: '',
-            allFilenames: [],
+            selectedDocId: '',
+            allDocuments: [],
             latestMessage: 'Ready to create a new document.'
         };
 
@@ -45,28 +39,26 @@ class App extends React.Component {
     afterReadAll = (data) => {
         if (this._isMounted) {
             this.setState({
-                allFilenames: data
+                allDocuments: data
             });
         }
-        if (this.state.allFilenames.length > 0) {
+        if (this.state.allDocuments.length > 0) {
             this.setState({
-                selectedFile: this.state.allFilenames[0]
+                selectedDocId: this.state.allDocuments[0]._id
             });
         }
     }
 
-    afterReadOne = (doc) => {
-        let filename = this.state.selectedFile;
-        this.switchRoom(filename);
-        this._isSaved = true;
+    afterReadOne = (data) => {
+        let doc = data[0];
+
+        this.switchRoom(doc._id);
         this.setState({
-            currentFilename: filename,
-            currentOwner: doc.ownerName,
-            currentOwnerEmail: doc.ownerEmail,
+            currentId: doc._id,
+            currentFilename: doc.filename,
             currentTitle: doc.title,
             currentContent: doc.content,
-            currentAllowedUsers: doc.allowedusers,
-            latestMessage: `Loaded document "${filename}" from database.`
+            latestMessage: `Loaded document "${doc.filename}" from database.`
         });
     }
 
@@ -74,20 +66,13 @@ class App extends React.Component {
         let doc = data[0];
 
         if (doc.exists === "false") {
-            this._isSaved = true;
             this.switchRoom(doc.insertedId);
             this.setState({
                 currentId: doc.insertedId,
                 latestMessage: "Document saved to database."
             });
 
-            let params = { email: this.state.currentUser };
-            backend(
-                "readall",
-                ENDPOINT,
-                this.afterReadAll,
-                params
-            );
+            backend("readall", ENDPOINT, this.afterReadAll);
             return;
         }
 
@@ -126,21 +111,21 @@ class App extends React.Component {
             data.content = this.state.currentContent;
         }
 
-        if (!this._isSaved) { return; }
+        if (this.state.currentId.length === 0) { return; }
 
-        data.room = this.state.currentFilename;
+        data.room = this.state.currentId;
         socket.emit("send", data);
         return;
     }
 
-    handleDropDownChange = (filename) => {
+    handleDropDownChange = (documentid) => {
         this.setState({
-            selectedFile: filename
+            selectedDocId: documentid
         });
     }
 
     handleClick = (action) => {
-        if ((action === "save") && (!this._isSaved)) {
+        if ((action === "save") && (this.state.currentId.length === 0)) {
             backend(
                 "create",
                 ENDPOINT,
@@ -148,18 +133,17 @@ class App extends React.Component {
                     filename: this.state.currentFilename,
                     title: this.state.currentTitle,
                     content: this.state.currentContent,
-                    email: this.state.currentUser
                  }
             );
             return;
         }
 
-        if ((action === "save") && (this._isSaved)) {
+        if ((action === "save") && (this.state.currentId.length > 0)) {
             backend(
                 "update",
                 ENDPOINT,
                 this.afterUpdate, {
-                    filename: this.state.currentFilename,
+                    docid: this.state.currentId,
                     title: this.state.currentTitle,
                     content: this.state.currentContent,
                  }
@@ -168,9 +152,9 @@ class App extends React.Component {
         }
 
         if (action === "clear") {
-            socket.emit("leave", this.state.currentFilename);
-            this._isSaved = false;
+            socket.emit("leave", this.state.currentId);
             this.setState({
+                currentId: '',
                 currentFilename: '',
                 currentTitle: '',
                 currentContent: '',
@@ -184,14 +168,14 @@ class App extends React.Component {
                 "readone",
                 ENDPOINT,
                 this.afterReadOne,
-                { filename: this.state.selectedFile }
+                { id: this.state.selectedDocId }
             );
             return;
         }
     }
 
     switchRoom = (newRoom) => {
-        socket.emit("leave", this.state.currentFilename);
+        socket.emit("leave", this.state.currentId);
         socket.emit("join", newRoom);
     }
 
@@ -260,7 +244,7 @@ class App extends React.Component {
                         <DropDown
                             title="Open a document"
                             elementId="fileDropdown"
-                            availableFiles={this.state.allFilenames}
+                            docList={this.state.allDocuments}
                             onChange={this.handleDropDownChange}/>
                         <ToolbarButton
                             classes=""
@@ -283,7 +267,6 @@ class App extends React.Component {
                     label="Title"
                     name="docInfoTitle"
                     value={this.state.currentTitle}
-                    saved={this._isSaved}
                     id={this.state.currentId}
                     onChange={this.handleTextInputChange}/>
                 <div className="editorContainer">
@@ -305,7 +288,6 @@ class App extends React.Component {
                             label="Filename (must be unique)"
                             name="docInfoFilename"
                             value={this.state.currentFilename}
-                            saved={this._isSaved}
                             id={this.state.currentId}
                             onChange={this.handleTextInputChange}/>
                         <ToolbarButton
@@ -328,12 +310,10 @@ class App extends React.Component {
     componentDidMount = () => {
         this._isMounted = true;
         if (this._isMounted) {
-            let params = { email: this.state.currentUser };
             backend(
                 "readall",
                 ENDPOINT,
-                this.afterReadAll,
-                params
+                this.afterReadAll
             );
 
             socket.on('connect', () => {

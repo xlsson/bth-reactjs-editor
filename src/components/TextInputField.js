@@ -12,7 +12,7 @@ class TextInputField extends React.Component {
 
     render() {
         let disabled = false;
-        if ((this.props.name === "docInfoFilename") && (this.props.id.length > 0)) {
+        if ((this.props.name === "docInfoFilename") && (this.props.saved)) {
             disabled = true;
         }
         return (
