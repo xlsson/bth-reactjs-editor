@@ -25,16 +25,17 @@ class App extends React.Component {
         this._isSaved = false;
 
         this.state = {
-            currentUser: 'richard.axelsson@gmail.com',
-            currentId: '',
+            currentUserName: '',
+            currentUserEmail: '',
             currentFilename: '',
-            currentOwner: '',
+            currentOwnerName: '',
             currentOwnerEmail: '',
             currentTitle: '',
             currentContent: '',
             currentAllowedUsers: [],
             selectedFile: '',
             allFilenames: [],
+            accountLinkText: "Login/register",
             latestMessage: 'Ready to create a new document.'
         };
 
@@ -61,7 +62,7 @@ class App extends React.Component {
         this._isSaved = true;
         this.setState({
             currentFilename: filename,
-            currentOwner: doc.ownerName,
+            currentOwnerName: doc.ownerName,
             currentOwnerEmail: doc.ownerEmail,
             currentTitle: doc.title,
             currentContent: doc.content,
@@ -71,17 +72,19 @@ class App extends React.Component {
     }
 
     afterCreateDoc = (data) => {
-        let doc = data[0];
 
-        if (doc.exists === "false") {
+        if (data.acknowledged) {
             this._isSaved = true;
-            this.switchRoom(doc.insertedId);
+            this.switchRoom(this.state.currentFilename);
+            let owner = this.state.currentUserName;
+            let ownerEmail = this.state.currentUserEmail;
             this.setState({
-                currentId: doc.insertedId,
+                currentOwnerName: owner,
+                currentOwnerEmail: ownerEmail,
                 latestMessage: "Document saved to database."
             });
 
-            let params = { email: this.state.currentUser };
+            let params = { email: this.state.currentUserEmail };
             backend(
                 "readall",
                 ENDPOINT,
@@ -140,6 +143,12 @@ class App extends React.Component {
     }
 
     handleClick = (action) => {
+        //If user is not logged in, clicking save instead opens login window
+        if ((action === "save") && (this.state.currentUserEmail === '')) {
+            this.loginModal("open");
+            return;
+        };
+        //If _isSaved flag isn't set, the document gets created in the db
         if ((action === "save") && (!this._isSaved)) {
             backend(
                 "create",
@@ -148,12 +157,12 @@ class App extends React.Component {
                     filename: this.state.currentFilename,
                     title: this.state.currentTitle,
                     content: this.state.currentContent,
-                    email: this.state.currentUser
+                    email: this.state.currentUserEmail
                  }
             );
             return;
         }
-
+        //If _isSaved flag is set, the document gets updated in the db
         if ((action === "save") && (this._isSaved)) {
             backend(
                 "update",
@@ -170,7 +179,11 @@ class App extends React.Component {
         if (action === "clear") {
             socket.emit("leave", this.state.currentFilename);
             this._isSaved = false;
+            let name = this.state.currentUserName;
+            let email = this.state.currentUserEmail;
             this.setState({
+                currentOwnerName: name,
+                currentOwnerEmail: email,
                 currentFilename: '',
                 currentTitle: '',
                 currentContent: '',
@@ -195,18 +208,60 @@ class App extends React.Component {
         socket.emit("join", newRoom);
     }
 
-    toggleLoginModal = (action) => {
+    loginModal = (action) => {
+        if (this.state.currentUserEmail.length > 0) {
+            this.clearStateAfterLogout();
+            return;
+        }
+
         if (action === "open") {
             ReactDOM.render(
                 <LoginModal
-                    onClick={this.toggleLoginModal}/>,
+                    onClick={this.loginModal}
+                    loginUser={this.loginUser}/>,
                 document.getElementById('login-modal')
             );
             return;
         }
+
         ReactDOM.unmountComponentAtNode(
             document.getElementById('login-modal')
         );
+    }
+
+    clearStateAfterLogout = () => {
+        this._isSaved = false;
+        this.setState({
+            currentUserName: '',
+            currentUserEmail: '',
+            currentFilename: '',
+            currentOwnerName: '',
+            currentOwnerEmail: '',
+            currentAllowedUsers: [],
+            selectedFile: '',
+            allFilenames: [],
+            accountLinkText: "Login/register",
+            latestMessage: 'Logged out'
+        });
+    }
+
+    loginUser = (email, password) => {
+        // Kolla om inloggning lyckas
+        // I så fall:
+        // få svar från databasen och kör nedanstående
+        // Spara dessutom currentUserName i state
+        this.setState({
+            currentUserEmail: email,
+            accountLinkText: "Logout"
+        }, () => {
+            let params = { email: this.state.currentUserEmail };
+            backend(
+                "readall",
+                ENDPOINT,
+                this.afterReadAll,
+                params
+            );
+        });
     }
 
     handlePdf = () => {
@@ -269,12 +324,18 @@ class App extends React.Component {
                             onClick={() => this.handleClick("load")} />
                         </>
                     </div>
+                    <div className="flex-column">
+                        <>
+                        <div className="field-title">Logged in as:</div>
+                        <div className="field-title">{this.state.currentUserEmail}</div>
+                        </>
+                    </div>
                     <ul className="flex-row header-menu">
                         <HeaderIcon
                             elementId="accounticon"
                             icon="account_circle"
-                            label="Login"
-                            onClick={() => this.toggleLoginModal("open")}/>
+                            label={this.state.accountLinkText}
+                            onClick={() => this.loginModal("open")}/>
                     </ul>
                     </>
                 </div>
@@ -284,8 +345,10 @@ class App extends React.Component {
                     name="docInfoTitle"
                     value={this.state.currentTitle}
                     saved={this._isSaved}
-                    id={this.state.currentId}
                     onChange={this.handleTextInputChange}/>
+                <div className="flex-row owner-wrapper">
+                    Document owner: {this.state.currentOwnerName} ({this.state.currentOwnerEmail})
+                </div>
                 <div className="editorContainer">
                     <ReactQuill
                     theme="bubble"
@@ -306,7 +369,6 @@ class App extends React.Component {
                             name="docInfoFilename"
                             value={this.state.currentFilename}
                             saved={this._isSaved}
-                            id={this.state.currentId}
                             onChange={this.handleTextInputChange}/>
                         <ToolbarButton
                             classes="red"
@@ -328,7 +390,7 @@ class App extends React.Component {
     componentDidMount = () => {
         this._isMounted = true;
         if (this._isMounted) {
-            let params = { email: this.state.currentUser };
+            let params = { email: this.state.currentUserEmail };
             backend(
                 "readall",
                 ENDPOINT,

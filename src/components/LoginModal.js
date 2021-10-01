@@ -10,7 +10,7 @@ class LoginModal extends React.Component {
         this.handleTextInputChange = this.handleTextInputChange.bind(this);
 
         this.state = {
-            user: "",
+            email: "",
             password: ""
         }
     }
@@ -20,13 +20,16 @@ class LoginModal extends React.Component {
     }
 
     confirm() {
-        console.log("confirm: ", this.state.user, this.state.password);
         this.props.onClick("close");
+        this.props.loginUser(
+            this.state.email,
+            this.state.password
+        );
     }
 
     handleTextInputChange(ev, field) {
-        if (field === "user") {
-            this.setState({ user: ev });
+        if (field === "email") {
+            this.setState({ email: ev });
             return;
         }
         if (field === "password") {
@@ -42,18 +45,16 @@ class LoginModal extends React.Component {
                         <div className="login-box flex-column">
                             <>
                             <TextInputField
-                                elementId="usernameInputField"
-                                label="Username:"
-                                name="username"
-                                value={this.state.user}
-                                id={this.state.currentId}
-                                onChange={(ev) => this.handleTextInputChange(ev, "user")}/>
+                                elementId="emailInputField"
+                                label="Username (e-mail):"
+                                name="email"
+                                value={this.state.email}
+                                onChange={(ev) => this.handleTextInputChange(ev, "email")}/>
                             <TextInputField
                                 elementId="passwordInputField"
                                 label="Password:"
                                 name="password"
                                 value={this.state.password}
-                                id={this.state.currentId}
                                 onChange={(ev) => this.handleTextInputChange(ev, "password")}/>
                             <a className="login-register-link" href="">
                                 Register

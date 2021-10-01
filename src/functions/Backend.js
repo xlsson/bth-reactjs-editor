@@ -80,6 +80,7 @@ function postRequest(url, callback, requestOptions) {
 
 function putRequest(url, callback, requestOptions) {
     fetch(url, requestOptions)
+        .then(response => response.json())
         .then(function(data) {
             return callback(data);
         });
