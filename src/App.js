@@ -74,6 +74,13 @@ class App extends React.Component {
 
     afterCreateDoc = (data) => {
 
+        if (!data.tokenIsVerified) {
+            this.setState({
+                message: "Token invalid. Session has expired/false token."
+            });
+            return;
+        }
+
         if (data.acknowledged) {
             this._isSaved = true;
             this.switchRoom(this.state.currentFilename);
@@ -103,6 +110,13 @@ class App extends React.Component {
     }
 
     afterUpdate = (data) => {
+        if (!data.tokenIsVerified) {
+            this.setState({
+                message: "Token invalid. Session has expired/false token."
+            });
+            return;
+        }
+
         this.setState({ message: "Changes saved to database." });
         return;
     }
@@ -155,6 +169,7 @@ class App extends React.Component {
                 "create",
                 ENDPOINT,
                 this.afterCreateDoc, {
+                    token: this.state.token,
                     filename: this.state.currentFilename,
                     title: this.state.currentTitle,
                     content: this.state.currentContent,
@@ -169,6 +184,7 @@ class App extends React.Component {
                 "update",
                 ENDPOINT,
                 this.afterUpdate, {
+                    token: this.state.token,
                     filename: this.state.currentFilename,
                     title: this.state.currentTitle,
                     content: this.state.currentContent,
@@ -263,8 +279,10 @@ class App extends React.Component {
 
     afterLoginAttempt = (data) => {
         if (data.userexists && data.verified) {
+            console.log(data);
+            // Saves token in state if login is successful
             this.setState({
-                token: data.email,
+                token: data.token,
                 currentUserEmail: data.email,
                 currentUserName: data.name,
                 accountLinkText: "Logout",

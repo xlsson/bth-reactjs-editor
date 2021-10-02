@@ -17,7 +17,10 @@ function backend(request, baseUrl, callback, params = {}) {
         url = `${baseUrl}/createone`;
         const requestOptions = {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'x-access-token': params.token
+            },
             body: JSON.stringify({
                 filename: params.filename,
                 title: params.title,
@@ -33,7 +36,10 @@ function backend(request, baseUrl, callback, params = {}) {
         url = `${baseUrl}/updateone`;
         const requestOptions = {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'x-access-token': params.token
+            },
             body: JSON.stringify({
                 filename: params.filename,
                 title: params.title,
