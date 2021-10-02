@@ -21,7 +21,7 @@ class LoginModal extends React.Component {
 
     confirm() {
         this.props.onClick("close");
-        this.props.loginUser(
+        this.props.loginAttempt(
             this.state.email,
             this.state.password
         );

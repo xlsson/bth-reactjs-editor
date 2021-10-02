@@ -25,7 +25,7 @@ function backend(request, baseUrl, callback, params = {}) {
                 email: params.email
              })
         };
-        putRequest(url, callback, requestOptions);
+        requestWithOptions(url, callback, requestOptions);
         return;
     }
 
@@ -40,7 +40,21 @@ function backend(request, baseUrl, callback, params = {}) {
                 content: params.content
              })
         };
-        putRequest(url, callback, requestOptions);
+        requestWithOptions(url, callback, requestOptions);
+        return;
+    }
+
+    if (request === "verifylogin") {
+        url = `${baseUrl}/verifylogin`;
+        const requestOptions = {
+            method: "POST",
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                email: params.email,
+                password: params.password,
+             })
+        };
+        requestWithOptions(url, callback, requestOptions);
         return;
     }
 
@@ -54,7 +68,7 @@ function backend(request, baseUrl, callback, params = {}) {
                 email: params.email
              })
         };
-        postRequest(url, callback, requestOptions);
+        requestWithOptions(url, callback, requestOptions);
         return;
     }
 
@@ -70,15 +84,7 @@ function getRequest(url, callback) {
     });
 }
 
-function postRequest(url, callback, requestOptions) {
-    fetch(url, requestOptions)
-        .then(response => response.json())
-        .then(function(data) {
-            return callback(data);
-        });
-}
-
-function putRequest(url, callback, requestOptions) {
+function requestWithOptions(url, callback, requestOptions) {
     fetch(url, requestOptions)
         .then(response => response.json())
         .then(function(data) {

@@ -25,6 +25,7 @@ class App extends React.Component {
         this._isSaved = false;
 
         this.state = {
+            token: '',
             currentUserName: '',
             currentUserEmail: '',
             currentFilename: '',
@@ -36,7 +37,7 @@ class App extends React.Component {
             selectedFile: '',
             allFilenames: [],
             accountLinkText: "Login/register",
-            latestMessage: 'Ready to create a new document.'
+            message: 'Ready to create a new document.'
         };
 
         this.handleTextInputChange = this.handleTextInputChange.bind(this);
@@ -67,7 +68,7 @@ class App extends React.Component {
             currentTitle: doc.title,
             currentContent: doc.content,
             currentAllowedUsers: doc.allowedusers,
-            latestMessage: `Loaded document "${filename}" from database.`
+            message: `Loaded document "${filename}" from database.`
         });
     }
 
@@ -76,12 +77,12 @@ class App extends React.Component {
         if (data.acknowledged) {
             this._isSaved = true;
             this.switchRoom(this.state.currentFilename);
-            let owner = this.state.currentUserName;
+            let ownerName = this.state.currentUserName;
             let ownerEmail = this.state.currentUserEmail;
             this.setState({
-                currentOwnerName: owner,
+                currentOwnerName: ownerName,
                 currentOwnerEmail: ownerEmail,
-                latestMessage: "Document saved to database."
+                message: "Document saved to database."
             });
 
             let params = { email: this.state.currentUserEmail };
@@ -95,14 +96,14 @@ class App extends React.Component {
         }
 
         this.setState({
-            latestMessage: "Filename already exists. Choose another name."
+            message: "Filename already exists. Choose another name."
         });
 
         return;
     }
 
     afterUpdate = (data) => {
-        this.setState({ latestMessage: "Changes saved to database." });
+        this.setState({ message: "Changes saved to database." });
         return;
     }
 
@@ -144,7 +145,7 @@ class App extends React.Component {
 
     handleClick = (action) => {
         //If user is not logged in, clicking save instead opens login window
-        if ((action === "save") && (this.state.currentUserEmail === '')) {
+        if ((action === "save") && (this.state.token.length === 0)) {
             this.loginModal("open");
             return;
         };
@@ -187,12 +188,12 @@ class App extends React.Component {
                 currentFilename: '',
                 currentTitle: '',
                 currentContent: '',
-                latestMessage: `Cleared. Ready to create a new document.`
+                message: `Cleared. Ready to create a new document.`
             });
             return;
         }
 
-        if (action === "load") {
+        if ((action === "load") && (this.state.token.length > 0)) {
             backend(
                 "readone",
                 ENDPOINT,
@@ -209,7 +210,8 @@ class App extends React.Component {
     }
 
     loginModal = (action) => {
-        if (this.state.currentUserEmail.length > 0) {
+        //If something is stored in token, click means logout
+        if (this.state.token.length > 0) {
             this.clearStateAfterLogout();
             return;
         }
@@ -218,7 +220,7 @@ class App extends React.Component {
             ReactDOM.render(
                 <LoginModal
                     onClick={this.loginModal}
-                    loginUser={this.loginUser}/>,
+                    loginAttempt={this.loginAttempt}/>,
                 document.getElementById('login-modal')
             );
             return;
@@ -232,6 +234,7 @@ class App extends React.Component {
     clearStateAfterLogout = () => {
         this._isSaved = false;
         this.setState({
+            token: '',
             currentUserName: '',
             currentUserEmail: '',
             currentFilename: '',
@@ -241,27 +244,54 @@ class App extends React.Component {
             selectedFile: '',
             allFilenames: [],
             accountLinkText: "Login/register",
-            latestMessage: 'Logged out'
+            message: 'Logged out'
         });
     }
 
-    loginUser = (email, password) => {
-        // Kolla om inloggning lyckas
-        // I så fall:
-        // få svar från databasen och kör nedanstående
-        // Spara dessutom currentUserName i state
+    loginAttempt = (email, password) => {
+        let params = {
+            email: email,
+            password: password,
+        };
+        backend(
+            "verifylogin",
+            ENDPOINT,
+            this.afterLoginAttempt,
+            params
+        );
+    }
+
+    afterLoginAttempt = (data) => {
+        if (data.userexists && data.verified) {
+            this.setState({
+                token: data.email,
+                currentUserEmail: data.email,
+                currentUserName: data.name,
+                accountLinkText: "Logout",
+                message: `Successful login.`
+            }, () => {
+                let params = { email: data.email };
+                backend(
+                    "readall",
+                    ENDPOINT,
+                    this.afterReadAll,
+                    params
+                );
+            });
+            return;
+        }
+
+        if (data.userexists && !data.verified) {
+            this.setState({
+                message: `Wrong password. Please try again.`
+            });
+            return;
+        }
+
         this.setState({
-            currentUserEmail: email,
-            accountLinkText: "Logout"
-        }, () => {
-            let params = { email: this.state.currentUserEmail };
-            backend(
-                "readall",
-                ENDPOINT,
-                this.afterReadAll,
-                params
-            );
+            message: `User does not exist. Please register first.`
         });
+        return;
     }
 
     handlePdf = () => {
@@ -379,7 +409,7 @@ class App extends React.Component {
                     </>
                 </div>
                 <div className="message-box">
-                    >>> {this.state.latestMessage}
+                    {this.state.message}
                 </div>
                 <div id="login-modal"></div>
                 </>
@@ -389,7 +419,7 @@ class App extends React.Component {
 
     componentDidMount = () => {
         this._isMounted = true;
-        if (this._isMounted) {
+        if (this._isMounted && (this.state.token.length > 0)) {
             let params = { email: this.state.currentUserEmail };
             backend(
                 "readall",

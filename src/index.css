@@ -170,6 +170,7 @@ input {
     min-width: 140px;
 }
 
+select:disabled,
 input:disabled {
     background-color: #eee;
 }
