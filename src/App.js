@@ -45,7 +45,13 @@ class App extends React.Component {
     }
 
     afterReadAll = (data) => {
-        // add check for token first
+        if (!data.tokenIsVerified) {
+            this.setState({
+                message: "Token invalid. Session has expired/false token."
+            });
+            return;
+        }
+
         if (this._isMounted) {
             this.setState({
                 allFilenames: data.allFilenames
@@ -56,19 +62,27 @@ class App extends React.Component {
                 selectedFile: this.state.allFilenames[0]
             });
         }
+        return;
     }
 
-    afterReadOne = (doc) => {
+    afterReadOne = (data) => {
+        if (!data.tokenIsVerified) {
+            this.setState({
+                message: "Token invalid. Session has expired/false token."
+            });
+            return;
+        }
+
         let filename = this.state.selectedFile;
         this.switchRoom(filename);
         this._isSaved = true;
         this.setState({
             currentFilename: filename,
-            currentOwnerName: doc.ownerName,
-            currentOwnerEmail: doc.ownerEmail,
-            currentTitle: doc.title,
-            currentContent: doc.content,
-            currentAllowedUsers: doc.allowedusers,
+            currentOwnerName: data.ownerName,
+            currentOwnerEmail: data.ownerEmail,
+            currentTitle: data.title,
+            currentContent: data.content,
+            currentAllowedUsers: data.allowedusers,
             message: `Loaded document "${filename}" from database.`
         });
     }
@@ -149,7 +163,6 @@ class App extends React.Component {
         }
 
         if (!this._isSaved) { return; }
-
         data.room = this.state.currentFilename;
         socket.emit("send", data);
         return;
@@ -288,7 +301,6 @@ class App extends React.Component {
 
     afterLoginAttempt = (data) => {
         if (data.userexists && data.verified) {
-            console.log(data);
             // Saves token in state if login is successful
             this.setState({
                 token: data.token,
@@ -449,18 +461,7 @@ class App extends React.Component {
 
     componentDidMount = () => {
         this._isMounted = true;
-        if (this._isMounted && (this.state.token.length > 0)) {
-            let params = {
-                token: this.state.token,
-                email: this.state.currentUserEmail
-            };
-            backend(
-                "readall",
-                ENDPOINT,
-                this.afterReadAll,
-                params
-            );
-
+        if (this._isMounted) {
             socket.on('connect', () => {
                 socket.on('send', (data) => {
                     this._isFromRemote = true;
