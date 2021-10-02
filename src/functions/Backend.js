@@ -3,13 +3,25 @@ function backend(request, baseUrl, callback, params = {}) {
 
     if (request === "readall") {
         url = `${baseUrl}/readall/${params.email}`;
-        getRequest(url, callback);
+        const requestOptions = {
+            headers: {
+                'Content-Type': 'application/json',
+                'x-access-token': params.token
+            }
+        };
+        sendRequest(url, callback, requestOptions);
         return;
     }
 
     if (request === "readone") {
         url = `${baseUrl}/readone/${params.filename}`;
-        getRequest(url, callback);
+        const requestOptions = {
+            headers: {
+                'Content-Type': 'application/json',
+                'x-access-token': params.token
+            }
+        };
+        sendRequest(url, callback, requestOptions);
         return;
     }
 
@@ -28,7 +40,7 @@ function backend(request, baseUrl, callback, params = {}) {
                 email: params.email
              })
         };
-        requestWithOptions(url, callback, requestOptions);
+        sendRequest(url, callback, requestOptions);
         return;
     }
 
@@ -46,7 +58,7 @@ function backend(request, baseUrl, callback, params = {}) {
                 content: params.content
              })
         };
-        requestWithOptions(url, callback, requestOptions);
+        sendRequest(url, callback, requestOptions);
         return;
     }
 
@@ -60,7 +72,7 @@ function backend(request, baseUrl, callback, params = {}) {
                 password: params.password,
              })
         };
-        requestWithOptions(url, callback, requestOptions);
+        sendRequest(url, callback, requestOptions);
         return;
     }
 
@@ -74,7 +86,7 @@ function backend(request, baseUrl, callback, params = {}) {
                 email: params.email
              })
         };
-        requestWithOptions(url, callback, requestOptions);
+        sendRequest(url, callback, requestOptions);
         return;
     }
 
@@ -82,15 +94,7 @@ function backend(request, baseUrl, callback, params = {}) {
     return;
 }
 
-function getRequest(url, callback) {
-    fetch(url)
-    .then(response => response.json())
-    .then(function(data) {
-        return callback(data);
-    });
-}
-
-function requestWithOptions(url, callback, requestOptions) {
+function sendRequest(url, callback, requestOptions) {
     fetch(url, requestOptions)
         .then(response => response.json())
         .then(function(data) {

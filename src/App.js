@@ -45,9 +45,10 @@ class App extends React.Component {
     }
 
     afterReadAll = (data) => {
+        // add check for token first
         if (this._isMounted) {
             this.setState({
-                allFilenames: data
+                allFilenames: data.allFilenames
             });
         }
         if (this.state.allFilenames.length > 0) {
@@ -92,7 +93,10 @@ class App extends React.Component {
                 message: "Document saved to database."
             });
 
-            let params = { email: this.state.currentUserEmail };
+            let params = {
+                token: this.state.token,
+                email: this.state.currentUserEmail
+            };
             backend(
                 "readall",
                 ENDPOINT,
@@ -210,11 +214,16 @@ class App extends React.Component {
         }
 
         if ((action === "load") && (this.state.token.length > 0)) {
+
+            let params = {
+                token: this.state.token,
+                filename: this.state.selectedFile
+            };
             backend(
                 "readone",
                 ENDPOINT,
                 this.afterReadOne,
-                { filename: this.state.selectedFile }
+                params
             );
             return;
         }
@@ -288,7 +297,10 @@ class App extends React.Component {
                 accountLinkText: "Logout",
                 message: `Successful login.`
             }, () => {
-                let params = { email: data.email };
+                let params = {
+                    token: data.token,
+                    email: data.email
+                };
                 backend(
                     "readall",
                     ENDPOINT,
@@ -438,7 +450,10 @@ class App extends React.Component {
     componentDidMount = () => {
         this._isMounted = true;
         if (this._isMounted && (this.state.token.length > 0)) {
-            let params = { email: this.state.currentUserEmail };
+            let params = {
+                token: this.state.token,
+                email: this.state.currentUserEmail
+            };
             backend(
                 "readall",
                 ENDPOINT,
