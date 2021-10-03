@@ -4,6 +4,8 @@ import ReactQuill from 'react-quill';
 import DropDown from './components/DropDown.js';
 import HeaderIcon from './components/HeaderIcon.js';
 import LoginModal from './components/LoginModal.js';
+import RegisterModal from './components/RegisterModal.js';
+import ShareModal from './components/ShareModal.js';
 import TextInputField from './components/TextInputField.js';
 import ToolbarButton from './components/ToolbarButton.js';
 import backend from './functions/Backend.js';
@@ -19,10 +21,9 @@ class App extends React.Component {
         super(props);
 
         this._isMounted = false;
-
         this._isFromRemote = false;
-
         this._isSaved = false;
+        this._activateShareIcon = false;
 
         this.state = {
             token: '',
@@ -84,6 +85,12 @@ class App extends React.Component {
             currentContent: data.content,
             currentAllowedUsers: data.allowedusers,
             message: `Loaded document "${filename}" from database.`
+        }, () => {
+            if (this.state.currentOwnerEmail === this.state.currentUserEmail) {
+                this._activateShareIcon = true;
+            } else {
+                this._activateShareIcon = false;
+            }
         });
     }
 
@@ -98,6 +105,7 @@ class App extends React.Component {
 
         if (data.acknowledged) {
             this._isSaved = true;
+            this._activateShareIcon = true;
             this.switchRoom(this.state.currentFilename);
             let ownerName = this.state.currentUserName;
             let ownerEmail = this.state.currentUserEmail;
@@ -213,6 +221,7 @@ class App extends React.Component {
         if (action === "clear") {
             socket.emit("leave", this.state.currentFilename);
             this._isSaved = false;
+            this._activateShareIcon = false;
             let name = this.state.currentUserName;
             let email = this.state.currentUserEmail;
             this.setState({
@@ -247,6 +256,52 @@ class App extends React.Component {
         socket.emit("join", newRoom);
     }
 
+    registerModal = (action) => {
+
+        if (action === "open") {
+            ReactDOM.render(
+                <RegisterModal
+                    registerModal={this.registerModal}
+                    loginModal={this.loginModal}
+                    loginAttempt={this.loginAttempt}
+                    registerUser={this.registerUser}/>,
+                document.getElementById('modal')
+            );
+            return;
+        }
+
+        ReactDOM.unmountComponentAtNode(
+            document.getElementById('modal')
+        );
+    }
+
+    registerUser = (data) => {
+        if ((data.email.length === 0) || (data.name.length === 0) || (data.name.length === 0)) {
+            this.setState({
+                message: `All fields must be filled out. Try again.`
+            });
+            return;
+        }
+        let params = {
+            email: data.email,
+            name: data.name,
+            password: data.password,
+        };
+        backend(
+            "createuser",
+            ENDPOINT,
+            this.afterRegisterUser,
+            params
+        );
+    }
+
+    afterRegisterUser = (data) => {
+        console.log(data);
+        this.setState({
+            message: `After register user. Ready to log in!`
+        });
+    }
+
     loginModal = (action) => {
         //If something is stored in token, click means logout
         if (this.state.token.length > 0) {
@@ -257,16 +312,38 @@ class App extends React.Component {
         if (action === "open") {
             ReactDOM.render(
                 <LoginModal
-                    onClick={this.loginModal}
-                    loginAttempt={this.loginAttempt}/>,
-                document.getElementById('login-modal')
+                    loginModal={this.loginModal}
+                    loginAttempt={this.loginAttempt}
+                    registerModal={this.registerModal}/>,
+                document.getElementById('modal')
             );
             return;
         }
 
         ReactDOM.unmountComponentAtNode(
-            document.getElementById('login-modal')
+            document.getElementById('modal')
         );
+    }
+
+    shareModal = (action) => {
+        if (action === "open") {
+            ReactDOM.render(
+                <ShareModal
+                    allowedUsers={this.state.currentAllowedUsers}
+                    shareModal={this.shareModal}
+                    changeAllowedUsers={this.changeAllowedUsers}/>,
+                document.getElementById('manage-allowed-users')
+            )
+            return;
+        }
+
+        ReactDOM.unmountComponentAtNode(
+            document.getElementById('manage-allowed-users')
+        );
+    }
+
+    changeAllowedUsers = (data) => {
+        console.log(data);
     }
 
     clearStateAfterLogout = () => {
@@ -363,21 +440,19 @@ class App extends React.Component {
                         <HeaderIcon
                             elementId="commenticon"
                             icon="comment_bank"
+                            active="true"
                             label="Comment"
                             onClick={this.handleComment}/>
                         <HeaderIcon
-                            elementId="shareicon"
-                            icon="group_add"
-                            label="Share"
-                            onClick={this.handleShare}/>
-                        <HeaderIcon
                             elementId="codeicon"
                             icon="code"
+                            active="true"
                             label="Code"
                             onClick={this.handleCode}/>
                         <HeaderIcon
                             elementId="pdficon"
                             icon="print"
+                            active="true"
                             label="PDF"
                             onClick={this.handlePdf}/>
                         </>
@@ -404,8 +479,15 @@ class App extends React.Component {
                     </div>
                     <ul className="flex-row header-menu">
                         <HeaderIcon
+                            elementId="shareicon"
+                            icon="group_add"
+                            active={this._activateShareIcon}
+                            label="Share"
+                            onClick={this.shareModal}/>
+                        <HeaderIcon
                             elementId="accounticon"
                             icon="account_circle"
+                            active="true"
                             label={this.state.accountLinkText}
                             onClick={() => this.loginModal("open")}/>
                     </ul>
@@ -434,6 +516,7 @@ class App extends React.Component {
                         elementId="buttonClear"
                         label="NEW (CLEAR)"
                         onClick={() => this.handleClick("clear")} />
+                    <div id="manage-allowed-users"></div>
                     <div className="flex-row align-items-end">
                         <TextInputField
                             elementId="filenameInputField"
@@ -453,7 +536,7 @@ class App extends React.Component {
                 <div className="message-box">
                     {this.state.message}
                 </div>
-                <div id="login-modal"></div>
+                <div id="modal"></div>
                 </>
             </div>
         );

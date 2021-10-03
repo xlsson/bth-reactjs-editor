@@ -83,7 +83,8 @@ function backend(request, baseUrl, callback, params = {}) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 name: params.name,
-                email: params.email
+                email: params.email,
+                password: params.password
              })
         };
         sendRequest(url, callback, requestOptions);

@@ -40,7 +40,7 @@ body {
     margin: 0 1em;
 }
 
-#login-modal-background {
+.modal-background {
     z-index: 100;
     background-color: rgba(0,0,0,0.6);
     height: 100%;
@@ -50,11 +50,11 @@ body {
     left: 0;
 }
 
-.login-wrapper {
+.modal-wrapper {
     justify-content: center;
 }
 
-.login-box {
+.modal-box {
     margin: 30vh auto;
     box-shadow: 0 4px 8px 0 rgba(0,0,0,0.3), 0 3px 10px 0 rgba(0,0,0,0.19);
     padding: 1em;
@@ -63,9 +63,16 @@ body {
     border-radius: 4px;
 }
 
-.login-modal-buttons {
+.modal-buttons {
     margin-top: 1em;
     justify-content: space-between;
+}
+
+.login-register-link {
+    text-decoration: underline;
+    margin: 0.5em 0 0 0;
+    padding: 0;
+    cursor: pointer;
 }
 
 .message-box {
@@ -104,7 +111,11 @@ body {
 .header-icon-label {
     font-size: 0.5em;
     font-weight: bold;
-    color: #000;
+}
+
+.inactive-icon {
+    cursor: default;
+    color: #ccc;
 }
 
 .editorContainer {

@@ -2,40 +2,46 @@ import React from 'react';
 import TextInputField from './TextInputField.js';
 import ToolbarButton from './ToolbarButton.js';
 
-class LoginModal extends React.Component {
+class RegisterModal extends React.Component {
     constructor(props) {
         super(props);
-        this.registerInstead = this.registerInstead.bind(this);
+        this.loginInstead = this.loginInstead.bind(this);
         this.cancel = this.cancel.bind(this);
         this.confirm = this.confirm.bind(this);
         this.handleTextInputChange = this.handleTextInputChange.bind(this);
 
         this.state = {
             email: "",
+            name: "",
             password: ""
-        }
+        };
     }
 
-    registerInstead() {
-        this.props.loginModal("close");
-        this.props.registerModal("open");
+    loginInstead() {
+        this.props.registerModal("close");
+        this.props.loginModal("open");
     }
 
     cancel() {
-        this.props.loginModal("close");
+        this.props.registerModal("close");
     }
 
     confirm() {
-        this.props.loginModal("close");
-        this.props.loginAttempt(
-            this.state.email,
-            this.state.password
-        );
+        this.props.registerModal("close");
+        this.props.registerUser({
+            email: this.state.email,
+            name: this.state.name,
+            password: this.state.password
+        });
     }
 
     handleTextInputChange(ev, field) {
         if (field === "email") {
             this.setState({ email: ev });
+            return;
+        }
+        if (field === "name") {
+            this.setState({ name: ev });
             return;
         }
         if (field === "password") {
@@ -57,13 +63,19 @@ class LoginModal extends React.Component {
                                 value={this.state.email}
                                 onChange={(ev) => this.handleTextInputChange(ev, "email")}/>
                             <TextInputField
+                                elementId="nameInputField"
+                                label="Name:"
+                                name="name"
+                                value={this.state.name}
+                                onChange={(ev) => this.handleTextInputChange(ev, "name")}/>
+                            <TextInputField
                                 elementId="passwordInputField"
                                 label="Password:"
                                 name="password"
                                 value={this.state.password}
                                 onChange={(ev) => this.handleTextInputChange(ev, "password")}/>
-                            <p className="login-register-link" onClick={this.registerInstead}>
-                                Register instead
+                            <p className="login-register-link" onClick={this.loginInstead}>
+                                Login instead
                             </p>
                             <div className="flex-row modal-buttons">
                                 <>
@@ -74,8 +86,8 @@ class LoginModal extends React.Component {
                                     onClick={this.cancel}/>
                                 <ToolbarButton
                                     classes="red"
-                                    elementId="buttonLogin"
-                                    label="LOG IN"
+                                    elementId="buttonRegister"
+                                    label="REGISTER"
                                     onClick={this.confirm}/>
                                 </>
                             </div>
@@ -87,4 +99,4 @@ class LoginModal extends React.Component {
     }
 }
 
-export default LoginModal;
+export default RegisterModal;
