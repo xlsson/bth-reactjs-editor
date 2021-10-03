@@ -80,7 +80,7 @@ class RegisterModal extends React.Component {
                             <div className="flex-row modal-buttons">
                                 <>
                                 <ToolbarButton
-                                    classes=""
+                                    classes="lighter"
                                     elementId="buttonLoginCancel"
                                     label="CANCEL"
                                     onClick={this.cancel}/>

@@ -20,7 +20,6 @@ class ManageAllowedUsers extends React.Component {
                 return option.value;
             }
         );
-        console.log(selected);
         this.setState({
             allowedUsers: selected
         });
@@ -31,13 +30,25 @@ class ManageAllowedUsers extends React.Component {
     }
 
     confirm() {
+        let allowedUsers = this.state.allowedUsers;
+        allowedUsers.push(this.props.currentUserEmail);
         this.props.shareModal("close");
-        this.props.changeAllowedUsers(
-            this.state.allowedUsers
-        );
+        this.props.updateUsers(allowedUsers);
     }
 
     render() {
+        let allUsers = this.props.allUsers;
+        let allowedUsers = this.props.allowedUsers;
+        let currentUserEmail = this.props.currentUserEmail;
+        let allowedList = [];
+
+        allUsers.forEach((user) => {
+            if (user !== currentUserEmail) {
+                let selected = "";
+                if (allowedUsers.includes(user)) { selected = "selected"; }
+                allowedList.push({ email: user, selected: selected });
+            }
+        });
         return (
             <div className="modal-background">
                 <div className="modal-wrapper flex-row">
@@ -45,25 +56,27 @@ class ManageAllowedUsers extends React.Component {
                         <>
                         <p className="field-title">Share this document with:</p>
                         <select
+                            className="multiple"
                             onChange={this.handleChange}
                             multiple="true">
-                            {this.props.allowedUsers.map((user, i) => (
+                            {allowedList.map((user, i) => (
                                 <option
                                     key={i}
-                                    value={user}>
-                                        {user}
+                                    value={user.email}
+                                    selected={user.selected}>
+                                        {user.email}
                                     </option>
                             ))}
                         </select>
                         <div className="flex-row modal-buttons">
                             <>
                             <ToolbarButton
-                                classes=""
+                                classes="lighter"
                                 elementId="buttonManageCancel"
                                 label="CANCEL"
                                 onClick={this.cancel}/>
                             <ToolbarButton
-                                classes="purple"
+                                classes="red"
                                 elementId="buttonManageAllowedUsers"
                                 label="SAVE"
                                 onClick={this.confirm} />

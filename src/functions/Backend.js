@@ -25,6 +25,18 @@ function backend(request, baseUrl, callback, params = {}) {
         return;
     }
 
+    if (request === "allusers") {
+        url = `${baseUrl}/allusers`;
+        const requestOptions = {
+            headers: {
+                'Content-Type': 'application/json',
+                'x-access-token': params.token
+            }
+        };
+        sendRequest(url, callback, requestOptions);
+        return;
+    }
+
     if (request === "create") {
         url = `${baseUrl}/createone`;
         const requestOptions = {
@@ -56,6 +68,23 @@ function backend(request, baseUrl, callback, params = {}) {
                 filename: params.filename,
                 title: params.title,
                 content: params.content
+             })
+        };
+        sendRequest(url, callback, requestOptions);
+        return;
+    }
+
+    if (request === "updateusers") {
+        url = `${baseUrl}/updateusers`;
+        const requestOptions = {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-access-token': params.token
+            },
+            body: JSON.stringify({
+                filename: params.filename,
+                allowedusers: params.allowedusers
              })
         };
         sendRequest(url, callback, requestOptions);

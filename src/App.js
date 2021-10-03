@@ -23,7 +23,6 @@ class App extends React.Component {
         this._isMounted = false;
         this._isFromRemote = false;
         this._isSaved = false;
-        this._activateShareIcon = false;
 
         this.state = {
             token: '',
@@ -37,6 +36,7 @@ class App extends React.Component {
             currentAllowedUsers: [],
             selectedFile: '',
             allFilenames: [],
+            activateShareIcon: false,
             accountLinkText: "Login/register",
             message: 'Ready to create a new document.'
         };
@@ -87,9 +87,13 @@ class App extends React.Component {
             message: `Loaded document "${filename}" from database.`
         }, () => {
             if (this.state.currentOwnerEmail === this.state.currentUserEmail) {
-                this._activateShareIcon = true;
+                this.setState({
+                    activateShareIcon: true
+                });
             } else {
-                this._activateShareIcon = false;
+                this.setState({
+                    activateShareIcon: false
+                });
             }
         });
     }
@@ -105,13 +109,13 @@ class App extends React.Component {
 
         if (data.acknowledged) {
             this._isSaved = true;
-            this._activateShareIcon = true;
             this.switchRoom(this.state.currentFilename);
             let ownerName = this.state.currentUserName;
             let ownerEmail = this.state.currentUserEmail;
             this.setState({
                 currentOwnerName: ownerName,
                 currentOwnerEmail: ownerEmail,
+                activateShareIcon: true,
                 message: "Document saved to database."
             });
 
@@ -188,6 +192,15 @@ class App extends React.Component {
             this.loginModal("open");
             return;
         };
+
+        //If filename is blank, do not save
+        if ((action === "save") && (this.state.currentFilename.length === 0)) {
+            this.setState({
+                message: `Not saved. Filename cannot be blank.`
+            });
+            return;
+        };
+
         //If _isSaved flag isn't set, the document gets created in the db
         if ((action === "save") && (!this._isSaved)) {
             backend(
@@ -221,7 +234,6 @@ class App extends React.Component {
         if (action === "clear") {
             socket.emit("leave", this.state.currentFilename);
             this._isSaved = false;
-            this._activateShareIcon = false;
             let name = this.state.currentUserName;
             let email = this.state.currentUserEmail;
             this.setState({
@@ -230,6 +242,7 @@ class App extends React.Component {
                 currentFilename: '',
                 currentTitle: '',
                 currentContent: '',
+                activateShareIcon: false,
                 message: `Cleared. Ready to create a new document.`
             });
             return;
@@ -296,9 +309,8 @@ class App extends React.Component {
     }
 
     afterRegisterUser = (data) => {
-        console.log(data);
         this.setState({
-            message: `After register user. Ready to log in!`
+            message: `User has been registered. Ready to log in!`
         });
     }
 
@@ -327,13 +339,15 @@ class App extends React.Component {
 
     shareModal = (action) => {
         if (action === "open") {
-            ReactDOM.render(
-                <ShareModal
-                    allowedUsers={this.state.currentAllowedUsers}
-                    shareModal={this.shareModal}
-                    changeAllowedUsers={this.changeAllowedUsers}/>,
-                document.getElementById('manage-allowed-users')
-            )
+            let params = {
+                token: this.state.token
+            };
+            backend(
+                "allusers",
+                ENDPOINT,
+                this.openShareModal,
+                params
+            );
             return;
         }
 
@@ -342,8 +356,37 @@ class App extends React.Component {
         );
     }
 
-    changeAllowedUsers = (data) => {
-        console.log(data);
+    openShareModal = (data) => {
+        ReactDOM.render(
+            <ShareModal
+                allUsers={data.allUsers}
+                allowedUsers={this.state.currentAllowedUsers}
+                currentUserEmail={this.state.currentUserEmail}
+                shareModal={this.shareModal}
+                updateUsers={this.updateUsers}/>,
+            document.getElementById('manage-allowed-users')
+        )
+    }
+
+    updateUsers = (data) => {
+        let params = {
+            token: this.state.token,
+            filename: this.state.currentFilename,
+            allowedusers: data
+        };
+        backend(
+            "updateusers",
+            ENDPOINT,
+            this.afterUpdateUsers,
+            params
+        );
+    }
+
+    afterUpdateUsers = (data) => {
+        this.setState({
+            currentAllowedUsers: data.allowedusers,
+            message: "List of allowed users has been updated."
+        });
     }
 
     clearStateAfterLogout = () => {
@@ -358,6 +401,7 @@ class App extends React.Component {
             currentAllowedUsers: [],
             selectedFile: '',
             allFilenames: [],
+            activateShareIcon: false,
             accountLinkText: "Login/register",
             message: 'Logged out'
         });
@@ -440,19 +484,19 @@ class App extends React.Component {
                         <HeaderIcon
                             elementId="commenticon"
                             icon="comment_bank"
-                            active="true"
+                            active={false}
                             label="Comment"
                             onClick={this.handleComment}/>
                         <HeaderIcon
                             elementId="codeicon"
                             icon="code"
-                            active="true"
+                            active={false}
                             label="Code"
                             onClick={this.handleCode}/>
                         <HeaderIcon
                             elementId="pdficon"
                             icon="print"
-                            active="true"
+                            active={false}
                             label="PDF"
                             onClick={this.handlePdf}/>
                         </>
@@ -481,7 +525,7 @@ class App extends React.Component {
                         <HeaderIcon
                             elementId="shareicon"
                             icon="group_add"
-                            active={this._activateShareIcon}
+                            active={this.state.activateShareIcon}
                             label="Share"
                             onClick={this.shareModal}/>
                         <HeaderIcon
