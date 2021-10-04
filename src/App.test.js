@@ -1,6 +1,9 @@
 import { render, waitFor, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event'
+import { configure } from "@testing-library/react";
 import App from './App';
+
+configure({ asyncUtilTimeout: 2000 });
 
 test('User clicking Clear button displays expected message', async () => {
   render(<App />);
@@ -13,30 +16,34 @@ test('User clicking Clear button displays expected message', async () => {
   expect(messageElement).toBeInTheDocument();
 });
 
-test('User clicking Load button displays document content', async () => {
-  await render(<App />);
+test('User logging in produces expected status message', async () => {
+  render(<App />);
 
-  const fileDropdown = await document.getElementById('fileDropdown');
+  userEvent.click(screen.getByText('Login/register'));
 
-  await waitFor(() => userEvent.selectOptions(fileDropdown, '613e187871b0599599dff086'));
+  await waitFor(() => screen.getByText(/Register instead/));
 
-  userEvent.click(document.getElementById('buttonLoad'));
+  const emailField = await document.getElementById('emailInputField');
+  const passwordField = await document.getElementById('passwordInputField');
+  const loginButton = await document.getElementById('buttonLogin');
 
-  await waitFor(() => screen.getByText(/thisisthetext2/));
+  userEvent.type(emailField, "kalle@fakeadress.se");
+  userEvent.type(passwordField, "password");
+  userEvent.click(loginButton);
 
-  await waitFor(() => expect(screen.getByText(/thisisthetext2/)).toBeInTheDocument());
+  await waitFor(() => screen.getByText("Successful login."));
+
+  expect(screen.getByText("Successful login.")).toBeInTheDocument();
 });
 
-test('User trying to save with an already existing filename displays expected message', async () => {
+test('User trying to save without being logged in shows login modal', async () => {
   await render(<App />);
 
-  await waitFor(() => screen.getAllByRole('option'));
-
-  userEvent.type(document.getElementById('filenameInputField'), 'mydocument');
+  await waitFor(() => document.getElementById('buttonSave'));
 
   userEvent.click(document.getElementById('buttonSave'));
 
-  await waitFor(() => screen.getByText(/Filename already exists/));
+  await waitFor(() => document.getElementById('buttonLogin'));
 
-  expect(screen.getByText(/Filename already exists/)).toBeInTheDocument();
+  expect(document.getElementById('buttonLogin')).toBeInTheDocument();
 });
