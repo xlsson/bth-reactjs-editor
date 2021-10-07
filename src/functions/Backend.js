@@ -2,12 +2,16 @@ function backend(request, baseUrl, callback, params = {}) {
     let url;
 
     if (request === "readall") {
-        url = `${baseUrl}/readall/${params.email}`;
+        let query = `{ allowedDocs (email: "${params.email}") { filename } }`;
+        url = `${baseUrl}/graphql`;
         const requestOptions = {
+            method: "POST",
             headers: {
                 'Content-Type': 'application/json',
+                'Accept': 'application/json',
                 'x-access-token': params.token
-            }
+            },
+            body: JSON.stringify({ query: query })
         };
         sendRequest(url, callback, requestOptions);
         return;

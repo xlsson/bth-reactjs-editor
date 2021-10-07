@@ -3,11 +3,14 @@ import React from 'react';
 class DropDown extends React.Component {
     constructor(props) {
         super(props);
+
         this.handleChange = this.handleChange.bind(this);
     }
 
     handleChange(e) {
-        this.props.onChange(e.target.value);
+        let i = e.target.value;
+        let filename = this.props.availableFiles[i].filename;
+        this.props.onChange(filename);
     }
 
     render() {
@@ -15,15 +18,16 @@ class DropDown extends React.Component {
         if (this.props.availableFiles.length === 0) {
             disabled = true;
         }
+
         return (
                 <div className="flex-column">
                     <p className="field-title">{this.props.title}</p>
                     <select id={this.props.elementId} onChange={this.handleChange} disabled={disabled}>
-                        {this.props.availableFiles.map((filename, i) => (
+                        {this.props.availableFiles.map((doc, i) => (
                             <option
                                 key={i}
-                                value={filename}>
-                                    {filename}
+                                value={i}>
+                                    {doc.filename}
                                 </option>
                         ))}
                     </select>

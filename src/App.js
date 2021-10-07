@@ -13,7 +13,8 @@ import socketIOClient from "socket.io-client";
 
 import 'react-quill/dist/quill.bubble.css';
 
-const ENDPOINT = "https://jsramverk-editor-riax20.azurewebsites.net";
+const ENDPOINT = "http://localhost:1234";
+// const ENDPOINT = "https://jsramverk-editor-riax20.azurewebsites.net";
 const socket = socketIOClient(ENDPOINT);
 
 class App extends React.Component {
@@ -35,7 +36,7 @@ class App extends React.Component {
             currentContent: '',
             currentAllowedUsers: [],
             selectedFile: '',
-            allFilenames: [],
+            allowedDocs: [],
             activateShareIcon: false,
             accountLinkText: "Login/register",
             message: 'Ready to create a new document.'
@@ -46,7 +47,8 @@ class App extends React.Component {
     }
 
     afterReadAll = (data) => {
-        if (!data.tokenIsVerified) {
+
+        if (data.tokenNotValid) {
             this.setState({
                 message: "Token invalid. Session has expired/false token."
             });
@@ -55,19 +57,19 @@ class App extends React.Component {
 
         if (this._isMounted) {
             this.setState({
-                allFilenames: data.allFilenames
+                allowedDocs: data.data.allowedDocs
             });
         }
-        if (this.state.allFilenames.length > 0) {
+        if (this.state.allowedDocs.length > 0) {
             this.setState({
-                selectedFile: this.state.allFilenames[0]
+                selectedFile: this.state.allowedDocs[0]
             });
         }
         return;
     }
 
     afterReadOne = (data) => {
-        if (!data.tokenIsVerified) {
+        if (data.tokenNotValid) {
             this.setState({
                 message: "Token invalid. Session has expired/false token."
             });
@@ -100,7 +102,7 @@ class App extends React.Component {
 
     afterCreateDoc = (data) => {
 
-        if (!data.tokenIsVerified) {
+        if (data.tokenNotValid) {
             this.setState({
                 message: "Token invalid. Session has expired/false token."
             });
@@ -140,7 +142,7 @@ class App extends React.Component {
     }
 
     afterUpdate = (data) => {
-        if (!data.tokenIsVerified) {
+        if (data.tokenNotValid) {
             this.setState({
                 message: "Token invalid. Session has expired/false token."
             });
@@ -400,7 +402,7 @@ class App extends React.Component {
             currentOwnerEmail: '',
             currentAllowedUsers: [],
             selectedFile: '',
-            allFilenames: [],
+            allowedDocs: [],
             activateShareIcon: false,
             accountLinkText: "Login/register",
             message: 'Logged out'
@@ -506,7 +508,7 @@ class App extends React.Component {
                         <DropDown
                             title="Open a document"
                             elementId="fileDropdown"
-                            availableFiles={this.state.allFilenames}
+                            availableFiles={this.state.allowedDocs}
                             onChange={this.handleDropDownChange}/>
                         <ToolbarButton
                             classes=""
