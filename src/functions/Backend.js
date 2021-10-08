@@ -1,53 +1,39 @@
 function backend(request, baseUrl, callback, params = {}) {
-    let url;
+    let url = `${baseUrl}/graphql`;
+    let query;
+    let requestOptions = {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'x-access-token': params.token
+        }
+    };
 
     if (request === "readall") {
         let query = `{ allowedDocs (email: "${params.email}") { filename } }`;
-        url = `${baseUrl}/graphql`;
-        const requestOptions = {
-            method: "POST",
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'x-access-token': params.token
-            },
-            body: JSON.stringify({ query: query })
-        };
+        requestOptions.body = JSON.stringify({ query: query });
         sendRequest(url, callback, requestOptions);
         return;
     }
 
     if (request === "readone") {
         let query = `{ doc (filename: "${params.filename}") { filename, title, content, allowedusers, ownerName, ownerEmail } }`;
-        url = `${baseUrl}/graphql`;
-        const requestOptions = {
-            method: "POST",
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'x-access-token': params.token
-            },
-            body: JSON.stringify({ query: query })
-        };
+        requestOptions.body = JSON.stringify({ query: query });
         sendRequest(url, callback, requestOptions);
         return;
     }
 
     if (request === "allusers") {
-        url = `${baseUrl}/allusers`;
-        const requestOptions = {
-            headers: {
-                'Content-Type': 'application/json',
-                'x-access-token': params.token
-            }
-        };
+        let query = `{ users { email } }`;
+        requestOptions.body = JSON.stringify({ query: query });
         sendRequest(url, callback, requestOptions);
         return;
     }
 
     if (request === "create") {
         url = `${baseUrl}/createone`;
-        const requestOptions = {
+        requestOptions = {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -66,7 +52,7 @@ function backend(request, baseUrl, callback, params = {}) {
 
     if (request === "update") {
         url = `${baseUrl}/updateone`;
-        const requestOptions = {
+        requestOptions = {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -84,7 +70,7 @@ function backend(request, baseUrl, callback, params = {}) {
 
     if (request === "updateusers") {
         url = `${baseUrl}/updateusers`;
-        const requestOptions = {
+        requestOptions = {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -101,7 +87,7 @@ function backend(request, baseUrl, callback, params = {}) {
 
     if (request === "verifylogin") {
         url = `${baseUrl}/verifylogin`;
-        const requestOptions = {
+        requestOptions = {
             method: "POST",
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -115,7 +101,7 @@ function backend(request, baseUrl, callback, params = {}) {
 
     if (request === "createuser") {
         url = `${baseUrl}/createuser`;
-        const requestOptions = {
+        requestOptions = {
             method: "POST",
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

@@ -13,8 +13,7 @@ import socketIOClient from "socket.io-client";
 
 import 'react-quill/dist/quill.bubble.css';
 
-const ENDPOINT = "http://localhost:1234";
-// const ENDPOINT = "https://jsramverk-editor-riax20.azurewebsites.net";
+const ENDPOINT = "https://jsramverk-editor-riax20.azurewebsites.net";
 const socket = socketIOClient(ENDPOINT);
 
 class App extends React.Component {
@@ -360,9 +359,11 @@ class App extends React.Component {
     }
 
     openShareModal = (data) => {
+        let allUsers = data.data.users;
+
         ReactDOM.render(
             <ShareModal
-                allUsers={data.allUsers}
+                allUsers={allUsers}
                 allowedUsers={this.state.currentAllowedUsers}
                 currentUserEmail={this.state.currentUserEmail}
                 shareModal={this.shareModal}

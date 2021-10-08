@@ -43,10 +43,10 @@ class ManageAllowedUsers extends React.Component {
         let allowedList = [];
 
         allUsers.forEach((user) => {
-            if (user !== currentUserEmail) {
+            if (user.email !== currentUserEmail) {
                 let selected = "";
-                if (allowedUsers.includes(user)) { selected = "selected"; }
-                allowedList.push({ email: user, selected: selected });
+                if (allowedUsers.includes(user.email)) { selected = "selected"; }
+                allowedList.push({ email: user.email, selected: selected });
             }
         });
         return (
