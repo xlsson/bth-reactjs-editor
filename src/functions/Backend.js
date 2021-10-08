@@ -18,12 +18,16 @@ function backend(request, baseUrl, callback, params = {}) {
     }
 
     if (request === "readone") {
-        url = `${baseUrl}/readone/${params.filename}`;
+        let query = `{ doc (filename: "${params.filename}") { filename, title, content, allowedusers, ownerName, ownerEmail } }`;
+        url = `${baseUrl}/graphql`;
         const requestOptions = {
+            method: "POST",
             headers: {
                 'Content-Type': 'application/json',
+                'Accept': 'application/json',
                 'x-access-token': params.token
-            }
+            },
+            body: JSON.stringify({ query: query })
         };
         sendRequest(url, callback, requestOptions);
         return;

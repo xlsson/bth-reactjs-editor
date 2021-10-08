@@ -62,7 +62,7 @@ class App extends React.Component {
         }
         if (this.state.allowedDocs.length > 0) {
             this.setState({
-                selectedFile: this.state.allowedDocs[0]
+                selectedFile: this.state.allowedDocs[0].filename
             });
         }
         return;
@@ -76,17 +76,18 @@ class App extends React.Component {
             return;
         }
 
-        let filename = this.state.selectedFile;
-        this.switchRoom(filename);
+        let doc = data.data.doc;
+
+        this.switchRoom(doc.filename);
         this._isSaved = true;
         this.setState({
-            currentFilename: filename,
-            currentOwnerName: data.ownerName,
-            currentOwnerEmail: data.ownerEmail,
-            currentTitle: data.title,
-            currentContent: data.content,
-            currentAllowedUsers: data.allowedusers,
-            message: `Loaded document "${filename}" from database.`
+            currentFilename: doc.filename,
+            currentOwnerName: doc.ownerName,
+            currentOwnerEmail: doc.ownerEmail,
+            currentTitle: doc.title,
+            currentContent: doc.content,
+            currentAllowedUsers: doc.allowedusers,
+            message: `Loaded document "${doc.filename}" from database.`
         }, () => {
             if (this.state.currentOwnerEmail === this.state.currentUserEmail) {
                 this.setState({
