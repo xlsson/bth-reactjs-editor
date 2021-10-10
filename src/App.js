@@ -46,7 +46,6 @@ class App extends React.Component {
     }
 
     afterReadAll = (data) => {
-
         if (data.tokenNotValid) {
             this.setState({
                 message: "Token invalid. Session has expired/false token."

@@ -1,6 +1,5 @@
 function backend(request, baseUrl, callback, params = {}) {
     let url = `${baseUrl}/graphql`;
-    let query;
     let requestOptions = {
         method: "POST",
         headers: {
