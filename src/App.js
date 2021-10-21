@@ -300,12 +300,6 @@ class App extends React.Component {
     }
 
     registerUser = (data) => {
-        if ((data.email.length === 0) || (data.name.length === 0) || (data.name.length === 0)) {
-            this.setState({
-                message: `All fields must be filled out. Try again.`
-            });
-            return;
-        }
         let params = {
             email: data.email,
             name: data.name,
