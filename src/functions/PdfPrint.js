@@ -8,8 +8,6 @@ function pdfPrint(title, content, baseUrl) {
 
     html = header + body + footer;
 
-    console.log(html);
-
     fetch(`${baseUrl}/printpdf`, {
         method: "POST",
         headers: { 'Content-Type': 'application/json' },

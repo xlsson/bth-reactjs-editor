@@ -265,6 +265,8 @@ tr.share:nth-child(even) {
 }
 
 .error-box {
+    text-align: left;
+    list-style: none;
     border: 1px solid #f00;
     background-color: rgba(255, 0, 0, 0.15);
     border-radius: 4px;

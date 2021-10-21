@@ -42,11 +42,19 @@ class App extends React.Component {
             message: 'Ready to create a new document.'
         };
 
-        this.handleTextInputChange = this.handleTextInputChange.bind(this);
-        this.handleClick = this.handleClick.bind(this);
+        // this.handleTextInputChange = this.handleTextInputChange.bind(this);
+        // this.handleClick = this.handleClick.bind(this);
     }
 
-    afterReadAll = (data) => {
+    // Checks that email is a valid e-mail address
+    checkEmailValid = (email) => {
+        const regex = new RegExp(/^[a-zA-Z0-9]+@(?:[a-zA-Z0-9]+\.)+[A-Za-z]+$/);
+        const emailIsValid = regex.test(email);
+
+        return emailIsValid;
+    }
+
+    afterGetAllowedDocs = (data) => {
         if (data.tokenNotValid) {
             this.setState({
                 message: "Token invalid. Session has expired/false token."
@@ -126,9 +134,9 @@ class App extends React.Component {
                 email: this.state.currentUserEmail
             };
             backend(
-                "readall",
+                "alloweddocs",
                 ENDPOINT,
-                this.afterReadAll,
+                this.afterGetAllowedDocs,
                 params
             );
             return;
@@ -277,6 +285,7 @@ class App extends React.Component {
             ReactDOM.render(
                 <RegisterModal
                     registerModal={this.registerModal}
+                    checkEmailValid={this.checkEmailValid}
                     loginModal={this.loginModal}
                     loginAttempt={this.loginAttempt}
                     registerUser={this.registerUser}/>,
@@ -366,6 +375,7 @@ class App extends React.Component {
                 allUsers={allUsers}
                 allowedUsers={this.state.currentAllowedUsers}
                 currentUserEmail={this.state.currentUserEmail}
+                checkEmailValid={this.checkEmailValid}
                 shareModal={this.shareModal}
                 sendInvite={this.sendInvite}
                 updateUsers={this.updateUsers}/>,
@@ -414,7 +424,8 @@ class App extends React.Component {
     }
 
     afterInvite = (data) => {
-        console.log("after invite", data.result);
+        // Lägg till en message box?
+        console.log("after invite: ", data.inviteSent);
     }
 
     clearStateAfterLogout = () => {
@@ -463,9 +474,9 @@ class App extends React.Component {
                     email: data.email
                 };
                 backend(
-                    "readall",
+                    "alloweddocs",
                     ENDPOINT,
-                    this.afterReadAll,
+                    this.afterGetAllowedDocs,
                     params
                 );
             });
@@ -495,10 +506,6 @@ class App extends React.Component {
 
     handleCode = () => {
         console.log("handleCode");
-    }
-
-    handleShare = () => {
-        console.log("handleShare");
     }
 
     handleComment = () => {

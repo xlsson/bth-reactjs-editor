@@ -9,7 +9,7 @@ function backend(request, baseUrl, callback, params = {}) {
         }
     };
 
-    if (request === "readall") {
+    if (request === "alloweddocs") {
         let query = `{ allowedDocs (email: "${params.email}") { filename } }`;
         requestOptions.body = JSON.stringify({ query: query });
         sendRequest(url, callback, requestOptions);

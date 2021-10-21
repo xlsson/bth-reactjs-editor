@@ -44,6 +44,10 @@ class ShareModal extends React.Component {
             return;
         }
 
+        // Set inviteEmail to "", close input field, remove error msg, display link
+        this.setState({
+            inviteEmail: ""
+        });
         ReactDOM.unmountComponentAtNode(inviteWrapper);
         this.errorMessage("hide");
         ReactDOM.render(
@@ -54,7 +58,7 @@ class ShareModal extends React.Component {
         return;
     }
 
-    errorMessage = (action, message="") => {
+    errorMessage = (action, message=[]) => {
         let div = document.getElementById("invite-message-wrapper");
         if (action === "show") {
             let inviteInput = document.getElementById('invite-input');
@@ -94,13 +98,19 @@ class ShareModal extends React.Component {
         const inviteEmail = this.state.inviteEmail;
 
         if (inviteEmail.length > 0) {
-            const emailIsValid = this.checkEmailValid(inviteEmail);
+            const emailIsValid = this.props.checkEmailValid(inviteEmail);
 
-            if (!emailIsValid) { return; }
+            if (!emailIsValid) {
+                this.errorMessage("show", ["E-mail not formatted correctly"]);
+                return;
+            }
 
             const userExists = this.checkUserExists(inviteEmail);
 
-            if (userExists) { return; }
+            if (userExists) {
+                this.errorMessage("show", ["This user is already registered"]);
+                return;
+            }
 
             this.sendInvite(inviteEmail);
             updatedList.push(inviteEmail);
@@ -128,25 +138,7 @@ class ShareModal extends React.Component {
                 userExists = true;
             }
         });
-
-        if (userExists) {
-            this.errorMessage("show", "This user is already registered");
-            return true;
-        }
-
-        return false;
-    }
-
-    // Check that email is a valid e-mail address
-    checkEmailValid = (inviteEmail) => {
-        const regex = new RegExp(/^[a-zA-Z0-9]+@(?:[a-zA-Z0-9]+\.)+[A-Za-z]+$/);
-        const emailIsValid = regex.test(inviteEmail);
-
-        if (!emailIsValid) {
-            this.errorMessage("show", "E-mail not formatted correctly");
-        }
-
-        return emailIsValid;
+        return userExists;
     }
 
     // Call function to send an e-mail invite
@@ -174,9 +166,10 @@ class ShareModal extends React.Component {
                             <tbody>
                             {this.state.users.map((user, i) => (
                                 <>
-                                    <tr key={i} className="share">
+                                    <tr className="share">
                                         <td className="share">
                                             <input
+                                                key={i}
                                                 type="checkbox"
                                                 value={user.checked}
                                                 onChange={() => this.handleChange(i)}
