@@ -1,6 +1,6 @@
 import React from 'react';
 import TextInputField from './TextInputField.js';
-import ToolbarButton from './ToolbarButton.js';
+import Button from './Button.js';
 
 class LoginModal extends React.Component {
     constructor(props) {
@@ -47,7 +47,7 @@ class LoginModal extends React.Component {
     render() {
         return (
                 <div className="modal-background">
-                    <div className="modal-wrapper flex-row">
+                    <div className="flex-row justify-content-center">
                         <div className="modal-box flex-column">
                             <>
                             <TextInputField
@@ -62,17 +62,17 @@ class LoginModal extends React.Component {
                                 name="password"
                                 value={this.state.password}
                                 onChange={(ev) => this.handleTextInputChange(ev, "password")}/>
-                            <p className="login-register-link" onClick={this.registerInstead}>
+                            <p className="modal-textlink" onClick={this.registerInstead}>
                                 Register instead
                             </p>
                             <div className="flex-row modal-buttons">
                                 <>
-                                <ToolbarButton
+                                <Button
                                     classes="lighter"
                                     elementId="buttonLoginCancel"
                                     label="CANCEL"
                                     onClick={this.cancel}/>
-                                <ToolbarButton
+                                <Button
                                     classes="red"
                                     elementId="buttonLogin"
                                     label="LOG IN"

@@ -19,6 +19,7 @@ class TextInputField extends React.Component {
             <div className="flex-column">
                 <label className="field-title" htmlFor={this.props.name}>{this.props.label}</label>
                 <input
+                    className="input"
                     id={this.props.elementId}
                     type="text"
                     name={this.props.name}

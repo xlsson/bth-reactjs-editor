@@ -113,6 +113,26 @@ function backend(request, baseUrl, callback, params = {}) {
         return;
     }
 
+    if (request === "sendinvite") {
+        url = `${baseUrl}/sendinvite`;
+        requestOptions = {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+                'x-access-token': params.token
+            },
+            body: JSON.stringify({
+            recipient: params.recipient,
+            inviterName: params.inviterName,
+            inviterEmail: params.inviterEmail,
+            filename: params.filename,
+            title: params.title
+             })
+        };
+        sendRequest(url, callback, requestOptions);
+        return;
+    }
+
     console.log("no http request made");
     return;
 }

@@ -1,8 +1,8 @@
 import React from 'react';
 
-class ToolbarButton extends React.Component {
+class Button extends React.Component {
     render() {
-        let classes = `toolbarButton ${this.props.classes}`;
+        let classes = `button ${this.props.classes}`;
         return (
             <button
                 className={classes}
@@ -14,4 +14,4 @@ class ToolbarButton extends React.Component {
     }
 }
 
-export default ToolbarButton;
+export default Button;

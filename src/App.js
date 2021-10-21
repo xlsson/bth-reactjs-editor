@@ -7,8 +7,9 @@ import LoginModal from './components/LoginModal.js';
 import RegisterModal from './components/RegisterModal.js';
 import ShareModal from './components/ShareModal.js';
 import TextInputField from './components/TextInputField.js';
-import ToolbarButton from './components/ToolbarButton.js';
+import Button from './components/Button.js';
 import backend from './functions/Backend.js';
+import pdfPrint from './functions/PdfPrint.js';
 import socketIOClient from "socket.io-client";
 
 import 'react-quill/dist/quill.bubble.css';
@@ -366,6 +367,7 @@ class App extends React.Component {
                 allowedUsers={this.state.currentAllowedUsers}
                 currentUserEmail={this.state.currentUserEmail}
                 shareModal={this.shareModal}
+                sendInvite={this.sendInvite}
                 updateUsers={this.updateUsers}/>,
             document.getElementById('manage-allowed-users')
         )
@@ -390,6 +392,29 @@ class App extends React.Component {
             currentAllowedUsers: data.allowedusers,
             message: "List of allowed users has been updated."
         });
+    }
+
+    sendInvite = (recipient) => {
+        console.log("send invite to: ", recipient);
+        console.log("overwritten with richard.axelsson@... during development");
+        let params = {
+            token: this.state.token,
+            recipient: "richard.axelsson@gmail.com",
+            inviterName: this.state.currentUserName,
+            inviterEmail: this.state.currentUserEmail,
+            filename: this.state.currentFilename,
+            title: this.state.currentTitle
+        };
+        backend(
+            "sendinvite",
+            ENDPOINT,
+            this.afterInvite,
+            params
+        );
+    }
+
+    afterInvite = (data) => {
+        console.log("after invite", data.result);
     }
 
     clearStateAfterLogout = () => {
@@ -460,8 +485,12 @@ class App extends React.Component {
         return;
     }
 
-    handlePdf = () => {
-        console.log("handlePdf");
+    handlePdfPrint = () => {
+        pdfPrint(
+            this.state.currentTitle,
+            this.state.currentContent,
+            ENDPOINT
+        );
     }
 
     handleCode = () => {
@@ -485,23 +514,11 @@ class App extends React.Component {
                     <ul className="flex-row header-menu">
                         <>
                         <HeaderIcon
-                            elementId="commenticon"
-                            icon="comment_bank"
-                            active={false}
-                            label="Comment"
-                            onClick={this.handleComment}/>
-                        <HeaderIcon
                             elementId="codeicon"
                             icon="code"
                             active={false}
-                            label="Code"
+                            label="Code mode"
                             onClick={this.handleCode}/>
-                        <HeaderIcon
-                            elementId="pdficon"
-                            icon="print"
-                            active={false}
-                            label="PDF"
-                            onClick={this.handlePdf}/>
                         </>
                     </ul>
                     <div className="flex-row align-items-end">
@@ -511,7 +528,7 @@ class App extends React.Component {
                             elementId="fileDropdown"
                             availableFiles={this.state.allowedDocs}
                             onChange={this.handleDropDownChange}/>
-                        <ToolbarButton
+                        <Button
                             classes=""
                             elementId="buttonLoad"
                             label="OPEN"
@@ -525,6 +542,12 @@ class App extends React.Component {
                         </>
                     </div>
                     <ul className="flex-row header-menu">
+                        <HeaderIcon
+                            elementId="pdficon"
+                            icon="print"
+                            active={true}
+                            label="PDF"
+                            onClick={this.handlePdfPrint}/>
                         <HeaderIcon
                             elementId="shareicon"
                             icon="group_add"
@@ -547,18 +570,36 @@ class App extends React.Component {
                     value={this.state.currentTitle}
                     saved={this._isSaved}
                     onChange={this.handleTextInputChange}/>
-                <div className="flex-row owner-wrapper">
-                    Document owner: {this.state.currentOwnerName} ({this.state.currentOwnerEmail})
+                <div className="flex-row justify-content-space-between align-items-center margin-top-1em">
+                    <>
+                        <p className="gray-title">
+                            Document owner: {this.state.currentOwnerName} ({this.state.currentOwnerEmail})
+                        </p>
+                        <ul className="flex-row header-menu">
+                            <HeaderIcon
+                                elementId="commentofficon"
+                                icon="visibility_off"
+                                active={false}
+                                label="Show/hide"
+                                onClick={this.handleComment}/>
+                            <HeaderIcon
+                                elementId="commenticon"
+                                icon="comment"
+                                active={false}
+                                label="New comment"
+                                onClick={this.handleComment}/>
+                        </ul>
+                    </>
                 </div>
                 <div className="editorContainer">
                     <ReactQuill
-                    theme="bubble"
-                    value={this.state.currentContent}
-                    onChange={(ev) => this.handleTextInputChange(ev, "content")}/>
+                        theme="bubble"
+                        value={this.state.currentContent}
+                        onChange={(ev) => this.handleTextInputChange(ev, "content")}/>
                 </div>
                 <div className="toolbar">
                     <>
-                    <ToolbarButton
+                    <Button
                         classes="lighter"
                         elementId="buttonClear"
                         label="NEW (CLEAR)"
@@ -572,7 +613,7 @@ class App extends React.Component {
                             value={this.state.currentFilename}
                             saved={this._isSaved}
                             onChange={this.handleTextInputChange}/>
-                        <ToolbarButton
+                        <Button
                             classes="red"
                             elementId="buttonSave"
                             label="SAVE"

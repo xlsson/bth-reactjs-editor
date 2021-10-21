@@ -26,3 +26,6 @@ yarn-error.log*
 # temp files for google drive backup
 /.tmp.drivedownload
 /.tmp.driveupload
+
+# Sendgrid
+sendgrid.env

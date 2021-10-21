@@ -22,7 +22,11 @@ class DropDown extends React.Component {
         return (
                 <div className="flex-column">
                     <p className="field-title">{this.props.title}</p>
-                    <select id={this.props.elementId} onChange={this.handleChange} disabled={disabled}>
+                    <select
+                        className="select"
+                        id={this.props.elementId}
+                        onChange={this.handleChange}
+                        disabled={disabled}>
                         {this.props.availableFiles.map((doc, i) => (
                             <option
                                 key={i}

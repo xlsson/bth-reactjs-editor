@@ -1,6 +1,6 @@
 import React from 'react';
 import TextInputField from './TextInputField.js';
-import ToolbarButton from './ToolbarButton.js';
+import Button from './Button.js';
 
 class RegisterModal extends React.Component {
     constructor(props) {
@@ -74,17 +74,17 @@ class RegisterModal extends React.Component {
                                 name="password"
                                 value={this.state.password}
                                 onChange={(ev) => this.handleTextInputChange(ev, "password")}/>
-                            <p className="login-register-link" onClick={this.loginInstead}>
+                            <p className="modal-textlink" onClick={this.loginInstead}>
                                 Login instead
                             </p>
                             <div className="flex-row modal-buttons">
                                 <>
-                                <ToolbarButton
+                                <Button
                                     classes="lighter"
                                     elementId="buttonLoginCancel"
                                     label="CANCEL"
                                     onClick={this.cancel}/>
-                                <ToolbarButton
+                                <Button
                                     classes="red"
                                     elementId="buttonRegister"
                                     label="REGISTER"
