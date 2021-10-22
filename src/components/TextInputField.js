@@ -1,12 +1,8 @@
 import React from 'react';
 
 class TextInputField extends React.Component {
-    constructor(props) {
-        super(props);
-        this.handleChange = this.handleChange.bind(this);
-    }
 
-    handleChange(e) {
+    handleChange = (e) => {
         this.props.onChange(e.target.value, this.props.name);
     }
 

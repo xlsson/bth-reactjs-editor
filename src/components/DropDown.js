@@ -1,13 +1,7 @@
 import React from 'react';
 
 class DropDown extends React.Component {
-    constructor(props) {
-        super(props);
-
-        this.handleChange = this.handleChange.bind(this);
-    }
-
-    handleChange(e) {
+    handleChange = (e) => {
         let i = e.target.value;
         let filename = this.props.availableFiles[i].filename;
         this.props.onChange(filename);

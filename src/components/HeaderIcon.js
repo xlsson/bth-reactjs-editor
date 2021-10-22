@@ -1,12 +1,7 @@
 import React from 'react';
 
 class HeaderIcon extends React.Component {
-    constructor(props) {
-        super(props);
-        this.handleClick = this.handleClick.bind(this);
-    }
-
-    handleClick() {
+    handleClick = () => {
         if (this.props.active) {
             this.props.onClick("open");
         }

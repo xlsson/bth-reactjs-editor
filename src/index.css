@@ -92,6 +92,7 @@ body {
 .header-menu {
     justify-content: flex-end;
     list-style-type: none;
+    align-items: flex-start;
     margin: 0;
     padding: 0;
     font-size: 1.5em;
@@ -114,6 +115,15 @@ body {
 .inactive-icon {
     cursor: default;
     color: #ccc;
+}
+
+.middle-icons {
+    justify-content: flex-end;
+    list-style-type: none;
+    align-items: flex-end;
+    margin: 0;
+    padding: 0;
+    font-size: 1.5em;
 }
 
 table.share {
@@ -167,6 +177,68 @@ tr.share:nth-child(even) {
 #invite-input {
     margin: 0;
     width: 100%;
+}
+
+.code-title {
+    font-size: 0.8em;
+    font-weight: bold;
+    color: #777;
+    text-align: left;
+    padding: 0;
+    margin: 0 0 0.2em 0.2em;
+}
+
+.green {
+    color: #0f0;
+}
+
+.black {
+    color: #000;
+}
+
+.code-wrapper {
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 0.4em;
+}
+
+.gray {
+    color: #ccc;
+}
+
+.code-icon {
+    font-size: 1.9em;
+    margin: 0 0 0 0.4em;
+    cursor: pointer;
+}
+
+.code-icon-label {
+    font-size: 0.8em;
+    font-weight: bold;
+}
+
+.code-run-button-ON {
+    border: 1px solid #000;
+    border-radius: 4px;
+    padding: 0.4em 0.8em;
+    background-color: #000;
+    color: #0f0;
+    font-size: 0.8em;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.code-run-button-OFF {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 0.4em 0.8em;
+    background-color: #ccc;
+    color: #fff;
+    font-size: 0.8em;
+    font-weight: bold;
+    cursor: default;
 }
 
 .editorContainer {
@@ -288,7 +360,7 @@ tr.share:nth-child(even) {
     box-shadow: 0 4px 8px 0 rgba(0,0,0,0.3), 0 3px 10px 0 rgba(0,0,0,0.19);
     color: white;
     font-weight: bold;
-    height: 3em;
+    height: 2.8em;
     padding: 10px 14px;
     margin: 0;
     border: none;

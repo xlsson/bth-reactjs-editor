@@ -1,11 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import ReactQuill from 'react-quill';
+import CodeModeBox from './components/CodeModeBox.js';
 import DropDown from './components/DropDown.js';
 import HeaderIcon from './components/HeaderIcon.js';
 import LoginModal from './components/LoginModal.js';
 import RegisterModal from './components/RegisterModal.js';
 import ShareModal from './components/ShareModal.js';
+import StatusField from './components/StatusField.js';
 import TextInputField from './components/TextInputField.js';
 import Button from './components/Button.js';
 import backend from './functions/Backend.js';
@@ -38,12 +40,11 @@ class App extends React.Component {
             selectedFile: '',
             allowedDocs: [],
             activateShareIcon: false,
+            codeMode: false,
             accountLinkText: "Login/register",
             message: 'Ready to create a new document.'
         };
 
-        // this.handleTextInputChange = this.handleTextInputChange.bind(this);
-        // this.handleClick = this.handleClick.bind(this);
     }
 
     // Checks that email is a valid e-mail address
@@ -498,8 +499,15 @@ class App extends React.Component {
         );
     }
 
-    handleCode = () => {
-        console.log("handleCode");
+    toggleCodeMode = () => {
+        let codeMode = !this.state.codeMode;
+        this.setState({
+            codeMode: codeMode
+        });
+    }
+
+    executeCode = () => {
+        console.log("executeCode");
     }
 
     handleComment = () => {
@@ -512,16 +520,11 @@ class App extends React.Component {
                 <>
                 <div className="flex-row header-wrapper">
                     <>
-                    <ul className="flex-row header-menu">
-                        <>
-                        <HeaderIcon
-                            elementId="codeicon"
-                            icon="code"
-                            active={false}
-                            label="Code mode"
-                            onClick={this.handleCode}/>
-                        </>
-                    </ul>
+                    <CodeModeBox
+                        elementId="codemodebox"
+                        active={this.state.codeMode}
+                        toggle={this.toggleCodeMode}
+                        execute={this.executeCode}/>
                     <div className="flex-row align-items-end">
                         <>
                         <DropDown
@@ -534,12 +537,6 @@ class App extends React.Component {
                             elementId="buttonLoad"
                             label="OPEN"
                             onClick={() => this.handleClick("load")} />
-                        </>
-                    </div>
-                    <div className="flex-column">
-                        <>
-                        <div className="field-title">Logged in as:</div>
-                        <div className="field-title">{this.state.currentUserEmail}</div>
                         </>
                     </div>
                     <ul className="flex-row header-menu">
@@ -573,10 +570,7 @@ class App extends React.Component {
                     onChange={this.handleTextInputChange}/>
                 <div className="flex-row justify-content-space-between align-items-center margin-top-1em">
                     <>
-                        <p className="gray-title">
-                            Document owner: {this.state.currentOwnerName} ({this.state.currentOwnerEmail})
-                        </p>
-                        <ul className="flex-row header-menu">
+                        <ul className="flex-row middle-icons">
                             <HeaderIcon
                                 elementId="commentofficon"
                                 icon="visibility_off"
@@ -592,7 +586,7 @@ class App extends React.Component {
                         </ul>
                     </>
                 </div>
-                <div className="editorContainer">
+                <div className="editorContainer" id="editorContainer">
                     <ReactQuill
                         theme="bubble"
                         value={this.state.currentContent}
@@ -605,6 +599,9 @@ class App extends React.Component {
                         elementId="buttonClear"
                         label="NEW (CLEAR)"
                         onClick={() => this.handleClick("clear")} />
+                    <StatusField
+                        currentUserEmail={this.state.currentUserEmail}
+                        currentOwnerEmail={this.state.currentOwnerEmail}/>
                     <div id="manage-allowed-users"></div>
                     <div className="flex-row align-items-end">
                         <TextInputField
