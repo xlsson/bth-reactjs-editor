@@ -1,9 +1,6 @@
 import React from 'react';
 
 class CodeModeBox extends React.Component {
-    constructor(props) {
-        super(props);
-    }
 
     execute = () => {
         if (this.props.active) {
@@ -24,7 +21,7 @@ class CodeModeBox extends React.Component {
         }
         return (
             <div className="flex-column">
-                <p class="code-title">Code mode is <span className={onoffColor}>{onoff}</span></p>
+                <p className="code-title">Code mode is <span className={onoffColor}>{onoff}</span></p>
                 <div className="code-wrapper flex-row">
                     <div
                         className={`code-run-button-${onoff}`}

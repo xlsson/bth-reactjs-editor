@@ -10,7 +10,7 @@ function backend(request, baseUrl, callback, params = {}) {
     };
 
     if (request === "alloweddocs") {
-        let query = `{ allowedDocs (email: "${params.email}") { filename } }`;
+        let query = `{ allowedDocs (email: "${params.email}", code: ${params.code}) { filename } }`;
         requestOptions.body = JSON.stringify({ query: query });
         sendRequest(url, callback, requestOptions);
         return;
@@ -40,6 +40,7 @@ function backend(request, baseUrl, callback, params = {}) {
             },
             body: JSON.stringify({
                 filename: params.filename,
+                code: params.code,
                 title: params.title,
                 content: params.content,
                 email: params.email

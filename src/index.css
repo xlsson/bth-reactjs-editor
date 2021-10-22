@@ -117,6 +117,15 @@ body {
     color: #ccc;
 }
 
+.load-save-bar {
+    justify-content: space-between;
+    align-items: flex-end;
+    margin: 2em 0;
+    padding: 1em;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
 .middle-icons {
     justify-content: flex-end;
     list-style-type: none;
@@ -241,12 +250,18 @@ tr.share:nth-child(even) {
     cursor: default;
 }
 
-.editorContainer {
+.editor-container {
     margin: 1em 0;
     background-color: #fff;
-    min-height: 50vh;
+    min-height: 350px;
     border: 1px solid #ccc;
     border-radius: 4px;
+    text-align: left;
+}
+
+.code-editor {
+    background-color: #000;
+    min-height: inherit;
 }
 
 .toolbar {
@@ -360,6 +375,7 @@ tr.share:nth-child(even) {
     box-shadow: 0 4px 8px 0 rgba(0,0,0,0.3), 0 3px 10px 0 rgba(0,0,0,0.19);
     color: white;
     font-weight: bold;
+    font-size: 0.8em;
     height: 2.8em;
     padding: 10px 14px;
     margin: 0;

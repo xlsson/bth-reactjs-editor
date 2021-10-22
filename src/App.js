@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import ReactQuill from 'react-quill';
+import {UnControlled as CodeMirror} from 'react-codemirror2';
 import CodeModeBox from './components/CodeModeBox.js';
 import DropDown from './components/DropDown.js';
 import HeaderIcon from './components/HeaderIcon.js';
@@ -10,12 +11,17 @@ import ShareModal from './components/ShareModal.js';
 import StatusField from './components/StatusField.js';
 import TextInputField from './components/TextInputField.js';
 import Button from './components/Button.js';
+
 import backend from './functions/Backend.js';
 import pdfPrint from './functions/PdfPrint.js';
 import socketIOClient from "socket.io-client";
 
 import 'react-quill/dist/quill.bubble.css';
+import 'codemirror/lib/codemirror.css';
+import 'codemirror/theme/material.css';
+require('codemirror/mode/javascript/javascript');
 
+// const ENDPOINT = "http://localhost:1234";
 const ENDPOINT = "https://jsramverk-editor-riax20.azurewebsites.net";
 const socket = socketIOClient(ENDPOINT);
 
@@ -132,7 +138,8 @@ class App extends React.Component {
 
             let params = {
                 token: this.state.token,
-                email: this.state.currentUserEmail
+                email: this.state.currentUserEmail,
+                code: this.state.codeMode
             };
             backend(
                 "alloweddocs",
@@ -220,6 +227,7 @@ class App extends React.Component {
                 this.afterCreateDoc, {
                     token: this.state.token,
                     filename: this.state.currentFilename,
+                    code: this.state.codeMode,
                     title: this.state.currentTitle,
                     content: this.state.currentContent,
                     email: this.state.currentUserEmail
@@ -436,6 +444,7 @@ class App extends React.Component {
             selectedFile: '',
             allowedDocs: [],
             activateShareIcon: false,
+            codeMode: false,
             accountLinkText: "Login/register",
             message: 'Logged out'
         });
@@ -466,7 +475,8 @@ class App extends React.Component {
             }, () => {
                 let params = {
                     token: data.token,
-                    email: data.email
+                    email: data.email,
+                    code: this.state.codeMode
                 };
                 backend(
                     "alloweddocs",
@@ -500,10 +510,60 @@ class App extends React.Component {
     }
 
     toggleCodeMode = () => {
+        // Set codeMode to opposite value of the current value
         let codeMode = !this.state.codeMode;
+
+        // Clear all state except login details: user email, name and token
+        this._isSaved = false;
         this.setState({
-            codeMode: codeMode
+            codeMode: codeMode,
+            currentFilename: '',
+            currentOwnerName: '',
+            currentOwnerEmail: '',
+            currentAllowedUsers: [],
+            selectedFile: '',
+            allowedDocs: [],
+            activateShareIcon: false
+        }, () => {
+            // get all documents where user is allowed, based on mode
+            let params = {
+                token: this.state.token,
+                email: this.state.currentUserEmail,
+                code: this.state.codeMode
+            };
+            backend(
+                "alloweddocs",
+                ENDPOINT,
+                this.afterGetAllowedDocs,
+                params
+            );
         });
+    }
+
+    renderQuill = () => {
+        return (
+            <div className="editor-container">
+                <ReactQuill
+                    theme="bubble"
+                    value={this.state.currentContent}
+                    onChange={(ev) => this.handleTextInputChange(ev, "content")}/>
+            </div>
+        );
+    }
+
+    renderCodeMirror = () => {
+        return (
+            <div className="editor-container code-editor">
+                <CodeMirror
+                    value={this.state.currentContent}
+                    options={{
+                        mode: 'javascript',
+                        theme: 'material',
+                        lineNumbers: true
+                    }}
+                    onChange={(editor, data, value) => this.handleTextInputChange(value, "content")}/>
+            </div>
+        );
     }
 
     executeCode = () => {
@@ -520,25 +580,10 @@ class App extends React.Component {
                 <>
                 <div className="flex-row header-wrapper">
                     <>
-                    <CodeModeBox
-                        elementId="codemodebox"
-                        active={this.state.codeMode}
-                        toggle={this.toggleCodeMode}
-                        execute={this.executeCode}/>
-                    <div className="flex-row align-items-end">
-                        <>
-                        <DropDown
-                            title="Open a document"
-                            elementId="fileDropdown"
-                            availableFiles={this.state.allowedDocs}
-                            onChange={this.handleDropDownChange}/>
-                        <Button
-                            classes=""
-                            elementId="buttonLoad"
-                            label="OPEN"
-                            onClick={() => this.handleClick("load")} />
-                        </>
-                    </div>
+                    <div className="logo">CirrusDocs</div>
+                    <StatusField
+                        currentUserEmail={this.state.currentUserEmail}
+                        currentOwnerEmail={this.state.currentOwnerEmail}/>
                     <ul className="flex-row header-menu">
                         <HeaderIcon
                             elementId="pdficon"
@@ -561,52 +606,31 @@ class App extends React.Component {
                     </ul>
                     </>
                 </div>
-                <TextInputField
-                    elementId="titleInputField"
-                    label="Title"
-                    name="docInfoTitle"
-                    value={this.state.currentTitle}
-                    saved={this._isSaved}
-                    onChange={this.handleTextInputChange}/>
-                <div className="flex-row justify-content-space-between align-items-center margin-top-1em">
-                    <>
-                        <ul className="flex-row middle-icons">
-                            <HeaderIcon
-                                elementId="commentofficon"
-                                icon="visibility_off"
-                                active={false}
-                                label="Show/hide"
-                                onClick={this.handleComment}/>
-                            <HeaderIcon
-                                elementId="commenticon"
-                                icon="comment"
-                                active={false}
-                                label="New comment"
-                                onClick={this.handleComment}/>
-                        </ul>
-                    </>
-                </div>
-                <div className="editorContainer" id="editorContainer">
-                    <ReactQuill
-                        theme="bubble"
-                        value={this.state.currentContent}
-                        onChange={(ev) => this.handleTextInputChange(ev, "content")}/>
-                </div>
-                <div className="toolbar">
+                <div className="flex-row load-save-bar">
                     <>
                     <Button
                         classes="lighter"
                         elementId="buttonClear"
                         label="NEW (CLEAR)"
                         onClick={() => this.handleClick("clear")} />
-                    <StatusField
-                        currentUserEmail={this.state.currentUserEmail}
-                        currentOwnerEmail={this.state.currentOwnerEmail}/>
-                    <div id="manage-allowed-users"></div>
+                    <div className="flex-row align-items-end">
+                        <>
+                        <DropDown
+                            title="Open a document"
+                            elementId="fileDropdown"
+                            availableFiles={this.state.allowedDocs}
+                            onChange={this.handleDropDownChange}/>
+                        <Button
+                            classes=""
+                            elementId="buttonLoad"
+                            label="OPEN"
+                            onClick={() => this.handleClick("load")} />
+                        </>
+                    </div>
                     <div className="flex-row align-items-end">
                         <TextInputField
                             elementId="filenameInputField"
-                            label="Filename (must be unique)"
+                            label="Filename"
                             name="docInfoFilename"
                             value={this.state.currentFilename}
                             saved={this._isSaved}
@@ -617,6 +641,39 @@ class App extends React.Component {
                             label="SAVE"
                             onClick={() => this.handleClick("save")} />
                     </div>
+                    </>
+                </div>
+                <TextInputField
+                    elementId="titleInputField"
+                    label="Document title"
+                    name="docInfoTitle"
+                    value={this.state.currentTitle}
+                    saved={this._isSaved}
+                    onChange={this.handleTextInputChange}/>
+                {!this.state.codeMode && this.renderQuill()}
+                {this.state.codeMode && this.renderCodeMirror()}
+                <div className="toolbar">
+                    <>
+                    <ul className="flex-row middle-icons">
+                        <HeaderIcon
+                            elementId="commentofficon"
+                            icon="visibility_off"
+                            active={false}
+                            label="Show/hide"
+                            onClick={this.handleComment}/>
+                        <HeaderIcon
+                            elementId="commenticon"
+                            icon="comment"
+                            active={false}
+                            label="New comment"
+                            onClick={this.handleComment}/>
+                    </ul>
+                    <div id="manage-allowed-users"></div>
+                    <CodeModeBox
+                        elementId="codemodebox"
+                        active={this.state.codeMode}
+                        toggle={this.toggleCodeMode}
+                        execute={this.executeCode}/>
                     </>
                 </div>
                 <div className="message-box">
