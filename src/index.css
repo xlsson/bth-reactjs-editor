@@ -253,7 +253,7 @@ tr.share:nth-child(even) {
 .editor-container {
     margin: 1em 0;
     background-color: #fff;
-    min-height: 350px;
+    min-height: 463px;
     border: 1px solid #ccc;
     border-radius: 4px;
     text-align: left;
@@ -262,6 +262,17 @@ tr.share:nth-child(even) {
 .code-editor {
     background-color: #000;
     min-height: inherit;
+}
+
+.code-editor-result {
+    margin: 0 0 1em;
+    background-color: #fff;
+    min-height: 100px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    text-align: left;
+    font-family: monospace;
+    padding: 1em;
 }
 
 .toolbar {

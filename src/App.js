@@ -47,6 +47,7 @@ class App extends React.Component {
             allowedDocs: [],
             activateShareIcon: false,
             codeMode: false,
+            codeOutput: "",
             accountLinkText: "Login/register",
             message: 'Ready to create a new document.'
         };
@@ -517,7 +518,10 @@ class App extends React.Component {
         this._isSaved = false;
         this.setState({
             codeMode: codeMode,
+            codeOutput: '',
             currentFilename: '',
+            currentTitle: '',
+            currentContent: '',
             currentOwnerName: '',
             currentOwnerEmail: '',
             currentAllowedUsers: [],
@@ -525,18 +529,20 @@ class App extends React.Component {
             allowedDocs: [],
             activateShareIcon: false
         }, () => {
-            // get all documents where user is allowed, based on mode
-            let params = {
-                token: this.state.token,
-                email: this.state.currentUserEmail,
-                code: this.state.codeMode
-            };
-            backend(
-                "alloweddocs",
-                ENDPOINT,
-                this.afterGetAllowedDocs,
-                params
-            );
+            if (this.state.token) {
+                // get all documents where user is allowed, based on mode
+                let params = {
+                    token: this.state.token,
+                    email: this.state.currentUserEmail,
+                    code: this.state.codeMode
+                };
+                backend(
+                    "alloweddocs",
+                    ENDPOINT,
+                    this.afterGetAllowedDocs,
+                    params
+                );
+            }
         });
     }
 
@@ -553,6 +559,7 @@ class App extends React.Component {
 
     renderCodeMirror = () => {
         return (
+            <>
             <div className="editor-container code-editor">
                 <CodeMirror
                     value={this.state.currentContent}
@@ -563,11 +570,33 @@ class App extends React.Component {
                     }}
                     onChange={(editor, data, value) => this.handleTextInputChange(value, "content")}/>
             </div>
+            <div className="field-title">Output</div>
+            <div className="code-editor-result">
+                {this.state.codeOutput}
+            </div>
+            </>
         );
     }
 
     executeCode = () => {
-        console.log("executeCode");
+        let base64code = btoa(this.state.currentContent);
+        let params = {
+            code: base64code
+        };
+        backend(
+            "execute",
+            ENDPOINT,
+            this.afterExecuteCode,
+            params
+        );
+        return;
+    }
+
+    afterExecuteCode = (data) => {
+        let result = atob(data.data);
+        this.setState({
+            codeOutput: result
+        });
     }
 
     handleComment = () => {

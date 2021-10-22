@@ -134,6 +134,21 @@ function backend(request, baseUrl, callback, params = {}) {
         return;
     }
 
+    if (request === "execute") {
+        url = `https://execjs.emilfolino.se/code`;
+        requestOptions = {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                code: params.code
+             })
+        };
+        sendRequest(url, callback, requestOptions);
+        return;
+    }
+
     console.log("no http request made");
     return;
 }
