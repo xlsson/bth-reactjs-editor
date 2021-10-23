@@ -23,7 +23,6 @@ import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/neo.css';
 require('codemirror/mode/javascript/javascript');
 
-// const ENDPOINT = "http://localhost:1234";
 const ENDPOINT = "https://jsramverk-editor-riax20.azurewebsites.net";
 const socket = socketIOClient(ENDPOINT);
 
