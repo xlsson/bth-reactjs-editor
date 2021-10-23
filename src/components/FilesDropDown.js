@@ -1,6 +1,6 @@
 import React from 'react';
 
-class DropDown extends React.Component {
+class FilesDropDown extends React.Component {
     handleChange = (e) => {
         let i = e.target.value;
         let filename = this.props.availableFiles[i].filename;
@@ -13,9 +13,14 @@ class DropDown extends React.Component {
             disabled = true;
         }
 
+        let title = "Text documents";
+        if (this.props.codeMode) {
+            title = "Code documents";
+        }
+
         return (
                 <div className="flex-column">
-                    <p className="field-title">{this.props.title}</p>
+                    <p className="field-title">{title}</p>
                     <select
                         className="select"
                         id={this.props.elementId}
@@ -34,4 +39,4 @@ class DropDown extends React.Component {
     }
 }
 
-export default DropDown;
+export default FilesDropDown;
