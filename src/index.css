@@ -73,6 +73,12 @@ body {
     cursor: pointer;
 }
 
+.logo {
+    height: 40px;
+    width: 172px;
+    background-image: url('./img/logo.png');
+}
+
 .flash-message-error {
     width: 300px;
     min-height: 17px;

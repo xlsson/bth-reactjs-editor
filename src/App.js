@@ -689,7 +689,7 @@ class App extends React.Component {
                 <>
                 <div className="flex-row header-wrapper">
                     <>
-                    <div className="logo">CirrusDocs</div>
+                    <div className="logo"></div>
                     <StatusField
                         currentUserEmail={this.state.currentUserEmail}
                         currentOwnerEmail={this.state.currentOwnerEmail}/>
