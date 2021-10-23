@@ -1,9 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import ReactQuill from 'react-quill';
-import {UnControlled as CodeMirror} from 'react-codemirror2';
+import {Controlled as CodeMirror} from 'react-codemirror2';
+import CommentBox from './components/CommentBox.js';
+import FlashMessage from './components/FlashMessage.js';
 import CodeModeBox from './components/CodeModeBox.js';
-import DropDown from './components/DropDown.js';
+import FilesDropDown from './components/FilesDropDown.js';
 import HeaderIcon from './components/HeaderIcon.js';
 import LoginModal from './components/LoginModal.js';
 import RegisterModal from './components/RegisterModal.js';
@@ -18,7 +20,7 @@ import socketIOClient from "socket.io-client";
 
 import 'react-quill/dist/quill.bubble.css';
 import 'codemirror/lib/codemirror.css';
-import 'codemirror/theme/material.css';
+import 'codemirror/theme/neo.css';
 require('codemirror/mode/javascript/javascript');
 
 // const ENDPOINT = "http://localhost:1234";
@@ -48,8 +50,13 @@ class App extends React.Component {
             activateShareIcon: false,
             codeMode: false,
             codeOutput: "",
+            cursorPosition: 0,
+            currentComments: [],
             accountLinkText: "Login/register",
-            message: 'Ready to create a new document.'
+            message: {
+                text: "",
+                type: "hidden"
+            }
         };
 
     }
@@ -65,7 +72,10 @@ class App extends React.Component {
     afterGetAllowedDocs = (data) => {
         if (data.tokenNotValid) {
             this.setState({
-                message: "Token invalid. Session has expired/false token."
+                message: {
+                    text: "Token invalid. Session has expired/false token.",
+                    type: "error"
+                }
             });
             return;
         }
@@ -86,7 +96,10 @@ class App extends React.Component {
     afterReadOne = (data) => {
         if (data.tokenNotValid) {
             this.setState({
-                message: "Token invalid. Session has expired/false token."
+                message: {
+                    text: "Token invalid. Session has expired/false token.",
+                    type: "error"
+                }
             });
             return;
         }
@@ -102,7 +115,10 @@ class App extends React.Component {
             currentTitle: doc.title,
             currentContent: doc.content,
             currentAllowedUsers: doc.allowedusers,
-            message: `Loaded document "${doc.filename}" from database.`
+            message: {
+                text: `Loaded document "${doc.filename}" from database.`,
+                type: "ok"
+            }
         }, () => {
             if (this.state.currentOwnerEmail === this.state.currentUserEmail) {
                 this.setState({
@@ -120,7 +136,10 @@ class App extends React.Component {
 
         if (data.tokenNotValid) {
             this.setState({
-                message: "Token invalid. Session has expired/false token."
+                message: {
+                    text: "Token invalid. Session has expired/false token.",
+                    type: "error"
+                }
             });
             return;
         }
@@ -134,7 +153,10 @@ class App extends React.Component {
                 currentOwnerName: ownerName,
                 currentOwnerEmail: ownerEmail,
                 activateShareIcon: true,
-                message: "Document saved to database."
+                message: {
+                    text: "Document saved to database.",
+                    type: "ok"
+                }
             });
 
             let params = {
@@ -152,7 +174,10 @@ class App extends React.Component {
         }
 
         this.setState({
-            message: "Filename already exists. Choose another name."
+            message: {
+                text: "Filename already exists. Choose another name.",
+                type: "error"
+            }
         });
 
         return;
@@ -161,12 +186,20 @@ class App extends React.Component {
     afterUpdate = (data) => {
         if (data.tokenNotValid) {
             this.setState({
-                message: "Token invalid. Session has expired/false token."
+                message: {
+                    text: "Token invalid. Session has expired/false token.",
+                    type: "error"
+                }
             });
             return;
         }
 
-        this.setState({ message: "Changes saved to database." });
+        this.setState({
+            message: {
+                text: "Changes saved to database.",
+                type: "ok"
+            }
+        });
         return;
     }
 
@@ -184,7 +217,11 @@ class App extends React.Component {
         }
 
         if (fieldName === "content") {
-            this.setState({ currentContent: ev });
+            this.setState({
+                currentContent: ev
+            }, () => {
+                console.log(this.state.currentContent);
+            });
             data.title = this.state.currentTitle;
             data.content = ev;
         } else if (fieldName === "docInfoTitle") {
@@ -215,7 +252,10 @@ class App extends React.Component {
         //If filename is blank, do not save
         if ((action === "save") && (this.state.currentFilename.length === 0)) {
             this.setState({
-                message: `Not saved. Filename cannot be blank.`
+                message: {
+                    text: "Not saved. Filename cannot be blank.",
+                    type: "error"
+                }
             });
             return;
         };
@@ -255,15 +295,17 @@ class App extends React.Component {
             socket.emit("leave", this.state.currentFilename);
             this._isSaved = false;
             let name = this.state.currentUserName;
-            let email = this.state.currentUserEmail;
             this.setState({
                 currentOwnerName: name,
-                currentOwnerEmail: email,
+                currentOwnerEmail: '',
                 currentFilename: '',
                 currentTitle: '',
                 currentContent: '',
                 activateShareIcon: false,
-                message: `Cleared. Ready to create a new document.`
+                message: {
+                    text: "Cleared. Ready to create a new document.",
+                    type: "ok"
+                }
             });
             return;
         }
@@ -325,7 +367,10 @@ class App extends React.Component {
 
     afterRegisterUser = (data) => {
         this.setState({
-            message: `User has been registered. Ready to log in!`
+            message: {
+                text: "User succesfully registered. Ready to log in!",
+                type: "ok"
+            }
         });
     }
 
@@ -404,7 +449,10 @@ class App extends React.Component {
     afterUpdateUsers = (data) => {
         this.setState({
             currentAllowedUsers: data.allowedusers,
-            message: "List of allowed users has been updated."
+            message: {
+                text: "Editing rights have been updated.",
+                type: "ok"
+            }
         });
     }
 
@@ -447,7 +495,10 @@ class App extends React.Component {
             activateShareIcon: false,
             codeMode: false,
             accountLinkText: "Login/register",
-            message: 'Logged out'
+            message: {
+                text: "Logged out.",
+                type: "ok"
+            }
         });
     }
 
@@ -472,7 +523,10 @@ class App extends React.Component {
                 currentUserEmail: data.email,
                 currentUserName: data.name,
                 accountLinkText: "Logout",
-                message: `Successful login.`
+                message: {
+                    text: "Successful login.",
+                    type: "ok"
+                }
             }, () => {
                 let params = {
                     token: data.token,
@@ -491,13 +545,19 @@ class App extends React.Component {
 
         if (data.userexists && !data.verified) {
             this.setState({
-                message: `Wrong password. Please try again.`
+                message: {
+                    text: "Wrong password. Please try again.",
+                    type: "error"
+                }
             });
             return;
         }
 
         this.setState({
-            message: `User does not exist. Please register first.`
+            message: {
+                text: "User does not exist. Please try again.",
+                type: "error"
+            }
         });
         return;
     }
@@ -546,12 +606,36 @@ class App extends React.Component {
         });
     }
 
+    getSelection = (ev) => {
+        let cursorPosition = ev.index + ev.length;
+
+        this.setState({
+            cursorPosition: cursorPosition
+        }, () => {
+            console.log(this.state.cursorPosition);
+        });
+    }
+
+    addComment = (newContent, comments) => {
+        console.log(comments);
+        this.handleTextInputChange(newContent, "content");
+        // this.setState({
+        //     currentContent: newContent
+        // });
+    }
+
+    toggleShowComments = () => {
+        console.log("show comments");
+    }
+
     renderQuill = () => {
+        console.log("render quill");
         return (
             <div className="editor-container">
                 <ReactQuill
                     theme="bubble"
                     value={this.state.currentContent}
+                    onBlur={this.getSelection}
                     onChange={(ev) => this.handleTextInputChange(ev, "content")}/>
             </div>
         );
@@ -565,10 +649,11 @@ class App extends React.Component {
                     value={this.state.currentContent}
                     options={{
                         mode: 'javascript',
-                        theme: 'material',
+                        theme: 'neo',
                         lineNumbers: true
                     }}
-                    onChange={(editor, data, value) => this.handleTextInputChange(value, "content")}/>
+                    onBeforeChange={(editor, data, value) =>
+                        this.handleTextInputChange(value, "content", editor)}/>
             </div>
             <div className="field-title">Output</div>
             <div className="code-editor-result">
@@ -597,10 +682,6 @@ class App extends React.Component {
         this.setState({
             codeOutput: result
         });
-    }
-
-    handleComment = () => {
-        console.log("handleComment");
     }
 
     render() {
@@ -644,9 +725,9 @@ class App extends React.Component {
                         onClick={() => this.handleClick("clear")} />
                     <div className="flex-row align-items-end">
                         <>
-                        <DropDown
-                            title="Open a document"
+                        <FilesDropDown
                             elementId="fileDropdown"
+                            codeMode={this.state.codeMode}
                             availableFiles={this.state.allowedDocs}
                             onChange={this.handleDropDownChange}/>
                         <Button
@@ -672,6 +753,8 @@ class App extends React.Component {
                     </div>
                     </>
                 </div>
+                <FlashMessage
+                    message={this.state.message}/>
                 <TextInputField
                     elementId="titleInputField"
                     label="Document title"
@@ -683,20 +766,13 @@ class App extends React.Component {
                 {this.state.codeMode && this.renderCodeMirror()}
                 <div className="toolbar">
                     <>
-                    <ul className="flex-row middle-icons">
-                        <HeaderIcon
-                            elementId="commentofficon"
-                            icon="visibility_off"
-                            active={false}
-                            label="Show/hide"
-                            onClick={this.handleComment}/>
-                        <HeaderIcon
-                            elementId="commenticon"
-                            icon="comment"
-                            active={false}
-                            label="New comment"
-                            onClick={this.handleComment}/>
-                    </ul>
+                    <CommentBox
+                        position={this.state.cursorPosition}
+                        content={this.state.currentContent}
+                        comments={this.state.currentComments}
+                        toggleShowComments={this.toggleShowComments}
+                        addComment={this.addComment}
+                        codeMode={this.state.codeMode}/>
                     <div id="manage-allowed-users"></div>
                     <CodeModeBox
                         elementId="codemodebox"
@@ -704,9 +780,6 @@ class App extends React.Component {
                         toggle={this.toggleCodeMode}
                         execute={this.executeCode}/>
                     </>
-                </div>
-                <div className="message-box">
-                    {this.state.message}
                 </div>
                 <div id="modal"></div>
                 </>

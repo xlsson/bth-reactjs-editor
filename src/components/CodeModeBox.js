@@ -12,12 +12,10 @@ class CodeModeBox extends React.Component {
     render() {
         let onoff = "OFF";
         let onoffColor = "gray";
-        let mainColor = "gray";
 
         if (this.props.active) {
             onoff = "ON";
-            onoffColor = "green";
-            mainColor = "black";
+            onoffColor = "black onoff-text-shadow";
         }
         return (
             <div className="flex-column">
@@ -27,7 +25,7 @@ class CodeModeBox extends React.Component {
                         className={`code-run-button-${onoff}`}
                         onClick={this.execute}>Execute</div>
                     <p
-                        className={`material-icons code-icon ${mainColor}`}
+                        className={`material-icons code-icon ${onoffColor}`}
                         onClick={this.props.toggle}>power_settings_new</p>
                 </div>
             </div>
