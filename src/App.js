@@ -230,15 +230,15 @@ class App extends React.Component {
         });
     }
 
-    handleClick = (action) => {
+    handleClickSave = () => {
         //If user is not logged in, clicking save instead opens login window
-        if ((action === "save") && (this.state.token.length === 0)) {
+        if (this.state.token.length === 0) {
             this.loginModal("open");
             return;
         };
 
         //If filename is blank, do not save
-        if ((action === "save") && (this.state.currentFilename.length === 0)) {
+        if (this.state.currentFilename.length === 0) {
 
             this.setFlashMessage({
                 text: "Not saved. Filename cannot be blank.",
@@ -248,7 +248,7 @@ class App extends React.Component {
         };
 
         //If _isSaved flag isn't set, the document gets created in the db
-        if ((action === "save") && (!this._isSaved)) {
+        if (!this._isSaved) {
             backend(
                 "create",
                 ENDPOINT,
@@ -264,7 +264,7 @@ class App extends React.Component {
             return;
         }
         //If _isSaved flag is set, the document gets updated in the db
-        if ((action === "save") && (this._isSaved)) {
+        if (this._isSaved) {
             backend(
                 "update",
                 ENDPOINT,
@@ -278,28 +278,10 @@ class App extends React.Component {
             return;
         }
 
-        if (action === "clear") {
-            socket.emit("leave", this.state.currentFilename);
-            this._isSaved = false;
-            let name = this.state.currentUserName;
-            this.setState({
-                currentOwnerName: name,
-                currentOwnerEmail: '',
-                currentFilename: '',
-                currentTitle: '',
-                currentContent: '',
-                activateShareIcon: false,
-                currentComments: [],
-                message: {
-                    text: "Cleared. Ready to create a new document.",
-                    type: "ok"
-                }
-            });
-            return;
-        }
+    }
 
-        if ((action === "load") && (this.state.token.length > 0)) {
-
+    handleClickLoad = () => {
+        if (this.state.token.length > 0) {
             let params = {
                 token: this.state.token,
                 filename: this.state.selectedFile
@@ -312,6 +294,25 @@ class App extends React.Component {
             );
             return;
         }
+    }
+
+    handleClickClear = () => {
+        socket.emit("leave", this.state.currentFilename);
+        this._isSaved = false;
+        let name = this.state.currentUserName;
+        this.setState({
+            currentOwnerName: name,
+            currentOwnerEmail: '',
+            currentFilename: '',
+            currentTitle: '',
+            currentContent: '',
+            activateShareIcon: false,
+            currentComments: [],
+            message: {
+                text: "Cleared. Ready to create a new document.",
+                type: "ok"
+            }
+        });
     }
 
     switchRoom = (newRoom) => {
@@ -628,8 +629,6 @@ class App extends React.Component {
         let commentsNew = [];
         let commentNode;
 
-        console.log(comments);
-
         comments.forEach((comment, i) => {
             commentNode = this._editor.dom.get(`comment${comment.nr}`);
             if (commentNode) { commentsNew.push(comment); }
@@ -766,7 +765,7 @@ class App extends React.Component {
                         classes="lighter"
                         elementId="buttonClear"
                         label="NEW (CLEAR)"
-                        onClick={() => this.handleClick("clear")} />
+                        onClick={this.handleClickClear} />
                     <div className="flex-row align-items-end">
                         <>
                         <FilesDropDown
@@ -778,7 +777,7 @@ class App extends React.Component {
                             classes=""
                             elementId="buttonLoad"
                             label="OPEN"
-                            onClick={() => this.handleClick("load")} />
+                            onClick={this.handleClickLoad} />
                         </>
                     </div>
                     <div className="flex-row align-items-end">
@@ -793,7 +792,7 @@ class App extends React.Component {
                             classes="red"
                             elementId="buttonSave"
                             label="SAVE"
-                            onClick={() => this.handleClick("save")} />
+                            onClick={this.handleClickSave} />
                     </div>
                     </>
                 </div>

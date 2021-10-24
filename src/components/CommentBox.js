@@ -61,7 +61,6 @@ class CommentBox extends React.Component {
     }
 
     handleSelectClick = (e) => {
-        console.log("click on dropdown");
         this.props.cleanUpComments();
     }
 
