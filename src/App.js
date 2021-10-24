@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import ReactQuill from 'react-quill';
-import {Controlled as CodeMirror} from 'react-codemirror2';
+import { Editor as TinyMCE } from '@tinymce/tinymce-react';
+import { Controlled as CodeMirror } from 'react-codemirror2';
 import CommentBox from './components/CommentBox.js';
 import FlashMessage from './components/FlashMessage.js';
 import CodeModeBox from './components/CodeModeBox.js';
@@ -18,9 +18,10 @@ import backend from './functions/Backend.js';
 import pdfPrint from './functions/PdfPrint.js';
 import socketIOClient from "socket.io-client";
 
-import 'react-quill/dist/quill.bubble.css';
+
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/neo.css';
+
 require('codemirror/mode/javascript/javascript');
 
 const ENDPOINT = "https://jsramverk-editor-riax20.azurewebsites.net";
@@ -33,6 +34,8 @@ class App extends React.Component {
         this._isMounted = false;
         this._isFromRemote = false;
         this._isSaved = false;
+        this._editor = null;
+        this.hideComments = true;
 
         this.state = {
             token: '',
@@ -114,6 +117,7 @@ class App extends React.Component {
             currentTitle: doc.title,
             currentContent: doc.content,
             currentAllowedUsers: doc.allowedusers,
+            currentComments: [],
             message: {
                 text: `Loaded document "${doc.filename}" from database.`,
                 type: "ok"
@@ -301,6 +305,7 @@ class App extends React.Component {
                 currentTitle: '',
                 currentContent: '',
                 activateShareIcon: false,
+                currentComments: [],
                 message: {
                     text: "Cleared. Ready to create a new document.",
                     type: "ok"
@@ -610,32 +615,80 @@ class App extends React.Component {
 
         this.setState({
             cursorPosition: cursorPosition
-        }, () => {
-            console.log(this.state.cursorPosition);
         });
     }
 
-    addComment = (newContent, comments) => {
-        console.log(comments);
-        this.handleTextInputChange(newContent, "content");
-        // this.setState({
-        //     currentContent: newContent
-        // });
+    addComment = (allComments) => {
+        let commentId = allComments.at(-1).nr;
+
+        console.log("In add, hidden is set to: ", this.hideComments);
+
+        let hidden = `hidden="false"`;
+        if (this.hideComments) {
+            hidden = `hidden="true"`;
+        }
+
+        this._editor.execCommand(
+            'mceInsertContent',
+            false,
+            ` </span><span class="comment" id="comment${commentId}" ${hidden}">[${commentId}]</span> `
+        );
+
+        this.setState({
+            currentComments: allComments
+        });
+
+        // return false;
     }
 
     toggleShowComments = () => {
         console.log("show comments");
+        let comments = this.state.currentComments;
+
+        console.log("In show, hidden was set to: ", this.hideComments);
+
+        this.hideComments = !this.hideComments;
+
+        console.log("In show, hidden is now set to: ", this.hideComments);
+
+        let cmnt;
+        comments.forEach((comment, i) => {
+            cmnt = this._editor.dom.get(`comment${i+1}`);
+            if (cmnt) {
+                cmnt.hidden = this.hideComments;
+                cmnt.style.color = "#f00";
+                console.log(cmnt);
+            } else {
+                console.log("skipped nr ", i+1);
+            }
+        });
     }
 
-    renderQuill = () => {
-        console.log("render quill");
+    renderTinyMCE = () => {
         return (
             <div className="editor-container">
-                <ReactQuill
-                    theme="bubble"
+                <TinyMCE
+                    initialValue=""
                     value={this.state.currentContent}
-                    onBlur={this.getSelection}
-                    onChange={(ev) => this.handleTextInputChange(ev, "content")}/>
+                    apiKey="tibczi1j1cdn33o7j2t8sckurdpakkzfp7ma52oha6f4qy11"
+                    init={{
+                        height: 500,
+                        menubar: false,
+                        plugins: [
+                            'advlist autolink lists link image',
+                            'charmap print preview anchor help',
+                            'searchreplace visualblocks code',
+                            'insertdatetime media table paste wordcount'
+                        ],
+                        toolbar:
+                            'undo redo | formatselect | bold italic | \
+                            alignleft aligncenter alignright | \
+                            bullist numlist outdent indent | help',
+                      setup: (editor) => {
+                          this._editor = editor;
+                      }
+                    }}
+                    onEditorChange={(ev) => this.handleTextInputChange(ev, "content")}/>
             </div>
         );
     }
@@ -761,7 +814,7 @@ class App extends React.Component {
                     value={this.state.currentTitle}
                     saved={this._isSaved}
                     onChange={this.handleTextInputChange}/>
-                {!this.state.codeMode && this.renderQuill()}
+                {!this.state.codeMode && this.renderTinyMCE()}
                 {this.state.codeMode && this.renderCodeMirror()}
                 <div className="toolbar">
                     <>
