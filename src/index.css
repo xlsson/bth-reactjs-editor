@@ -231,7 +231,7 @@ tr.share:nth-child(even) {
 .comment-icon {
     color: #000;
     font-size: 1.9em;
-    margin: 0 0 0 0.4em;
+    margin: 0 0.4em 0 0;
     cursor: pointer;
 }
 
@@ -295,7 +295,6 @@ tr.share:nth-child(even) {
 .editor-container {
     margin: 1em 0;
     background-color: #fff;
-    min-height: 464px;
     border: 1px solid #ccc;
     border-radius: 4px;
     text-align: left;
@@ -327,6 +326,7 @@ tr.share:nth-child(even) {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    align-items: flex-end;
 }
 
 .flex-row {
@@ -419,6 +419,14 @@ tr.share:nth-child(even) {
     margin: 0 1em 0 0;
     border: 1px solid #ccc;
     min-width: 140px;
+}
+
+.input-comment {
+    min-width: 150px;
+}
+
+.select-comment {
+    min-width: 300px;
 }
 
 .select:disabled,

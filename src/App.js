@@ -35,7 +35,6 @@ class App extends React.Component {
         this._isFromRemote = false;
         this._isSaved = false;
         this._editor = null;
-        this.hideComments = true;
 
         this.state = {
             token: '',
@@ -51,8 +50,8 @@ class App extends React.Component {
             allowedDocs: [],
             activateShareIcon: false,
             codeMode: false,
+            hideComments: true,
             codeOutput: "",
-            cursorPosition: 0,
             currentComments: [],
             accountLinkText: "Login/register",
             message: {
@@ -73,11 +72,9 @@ class App extends React.Component {
 
     afterGetAllowedDocs = (data) => {
         if (data.tokenNotValid) {
-            this.setState({
-                message: {
-                    text: "Token invalid. Session has expired/false token.",
-                    type: "error"
-                }
+            this.setFlashMessage({
+                text: "Token invalid. Session has expired/false token.",
+                type: "error"
             });
             return;
         }
@@ -97,11 +94,9 @@ class App extends React.Component {
 
     afterReadOne = (data) => {
         if (data.tokenNotValid) {
-            this.setState({
-                message: {
-                    text: "Token invalid. Session has expired/false token.",
-                    type: "error"
-                }
+            this.setFlashMessage({
+                text: "Token invalid. Session has expired/false token.",
+                type: "error"
             });
             return;
         }
@@ -136,13 +131,10 @@ class App extends React.Component {
     }
 
     afterCreateDoc = (data) => {
-
         if (data.tokenNotValid) {
-            this.setState({
-                message: {
-                    text: "Token invalid. Session has expired/false token.",
-                    type: "error"
-                }
+            this.setFlashMessage({
+                text: "Token invalid. Session has expired/false token.",
+                type: "error"
             });
             return;
         }
@@ -176,32 +168,25 @@ class App extends React.Component {
             return;
         }
 
-        this.setState({
-            message: {
-                text: "Filename already exists. Choose another name.",
-                type: "error"
-            }
+        this.setFlashMessage({
+            text: "Filename already exists. Choose another name.",
+            type: "error"
         });
-
         return;
     }
 
     afterUpdate = (data) => {
         if (data.tokenNotValid) {
-            this.setState({
-                message: {
-                    text: "Token invalid. Session has expired/false token.",
-                    type: "error"
-                }
+            this.setFlashMessage({
+                text: "Token invalid. Session has expired/false token.",
+                type: "error"
             });
             return;
         }
 
-        this.setState({
-            message: {
-                text: "Changes saved to database.",
-                type: "ok"
-            }
+        this.setFlashMessage({
+            text: "Changes saved to database.",
+            type: "ok"
         });
         return;
     }
@@ -254,11 +239,10 @@ class App extends React.Component {
 
         //If filename is blank, do not save
         if ((action === "save") && (this.state.currentFilename.length === 0)) {
-            this.setState({
-                message: {
-                    text: "Not saved. Filename cannot be blank.",
-                    type: "error"
-                }
+
+            this.setFlashMessage({
+                text: "Not saved. Filename cannot be blank.",
+                type: "error"
             });
             return;
         };
@@ -370,11 +354,9 @@ class App extends React.Component {
     }
 
     afterRegisterUser = (data) => {
-        this.setState({
-            message: {
-                text: "User succesfully registered. Ready to log in!",
-                type: "ok"
-            }
+        this.setFlashMessage({
+            text: "User succesfully registered. Ready to log in!",
+            type: "ok"
         });
     }
 
@@ -548,21 +530,18 @@ class App extends React.Component {
         }
 
         if (data.userexists && !data.verified) {
-            this.setState({
-                message: {
-                    text: "Wrong password. Please try again.",
-                    type: "error"
-                }
+            this.setFlashMessage({
+                text: "Wrong password. Please try again.",
+                type: "error"
             });
             return;
         }
 
-        this.setState({
-            message: {
-                text: "User does not exist. Please try again.",
-                type: "error"
-            }
+        this.setFlashMessage({
+            text: "User does not exist. Please try again.",
+            type: "error"
         });
+
         return;
     }
 
@@ -610,57 +589,91 @@ class App extends React.Component {
         });
     }
 
-    getSelection = (ev) => {
-        let cursorPosition = ev.index + ev.length;
-
-        this.setState({
-            cursorPosition: cursorPosition
-        });
-    }
-
-    addComment = (allComments) => {
+    // Adds a comment to the content
+    addCommentToContent = (allComments) => {
+        // Get the latest = highest comment nr
         let commentId = allComments.at(-1).nr;
 
-        console.log("In add, hidden is set to: ", this.hideComments);
+        let hidden = ``;
+        if (this.state.hideComments) { hidden = `hidden="true"`; }
 
-        let hidden = `hidden="false"`;
-        if (this.hideComments) {
-            hidden = `hidden="true"`;
-        }
+        let commentTag = `
+         <span class="comment" id="comment${commentId}" style="color: #f00;" ${hidden}>
+        [${commentId}]</span> `;
 
-        this._editor.execCommand(
-            'mceInsertContent',
-            false,
-            ` </span><span class="comment" id="comment${commentId}" ${hidden}">[${commentId}]</span> `
-        );
+        this._editor.execCommand('mceInsertContent', false, commentTag);
 
         this.setState({
             currentComments: allComments
         });
 
-        // return false;
+        return;
     }
 
     toggleShowComments = () => {
-        console.log("show comments");
+        this.setState({
+            hideComments: !this.state.hideComments
+        }, () => {
+            this.cleanUpComments(this.toggleCommentsCallback);
+        });
+    }
+
+    // Removes any comments not found in document from comments array
+    cleanUpComments = (callback) => {
+        // Make callback param optional
+        callback = callback || function(){};
+
         let comments = this.state.currentComments;
 
-        console.log("In show, hidden was set to: ", this.hideComments);
+        let commentsNew = [];
+        let commentNode;
 
-        this.hideComments = !this.hideComments;
+        console.log(comments);
 
-        console.log("In show, hidden is now set to: ", this.hideComments);
-
-        let cmnt;
         comments.forEach((comment, i) => {
-            cmnt = this._editor.dom.get(`comment${i+1}`);
-            if (cmnt) {
-                cmnt.hidden = this.hideComments;
-                cmnt.style.color = "#f00";
-                console.log(cmnt);
-            } else {
-                console.log("skipped nr ", i+1);
-            }
+            commentNode = this._editor.dom.get(`comment${comment.nr}`);
+            if (commentNode) { commentsNew.push(comment); }
+        });
+
+        this.setState({
+            currentComments: commentsNew
+        }, () => { callback(); });
+    }
+
+    toggleCommentsCallback = () => {
+        let comments = this.state.currentComments;
+        let commentNode;
+
+        comments.forEach((comment, i) => {
+            commentNode = this._editor.dom.get(`comment${comment.nr}`);
+            commentNode.hidden = this.state.hideComments;
+        });
+    }
+
+    setFlashMessage = (message={ text: "", type: "hidden" }) => {
+        this.setState({
+            message: message
+        });
+    }
+
+    executeCode = () => {
+        let base64code = btoa(this.state.currentContent);
+        let params = {
+            code: base64code
+        };
+        backend(
+            "execute",
+            ENDPOINT,
+            this.afterExecuteCode,
+            params
+        );
+        return;
+    }
+
+    afterExecuteCode = (data) => {
+        let result = atob(data.data);
+        this.setState({
+            codeOutput: result
         });
     }
 
@@ -713,27 +726,6 @@ class App extends React.Component {
             </div>
             </>
         );
-    }
-
-    executeCode = () => {
-        let base64code = btoa(this.state.currentContent);
-        let params = {
-            code: base64code
-        };
-        backend(
-            "execute",
-            ENDPOINT,
-            this.afterExecuteCode,
-            params
-        );
-        return;
-    }
-
-    afterExecuteCode = (data) => {
-        let result = atob(data.data);
-        this.setState({
-            codeOutput: result
-        });
     }
 
     render() {
@@ -819,12 +811,14 @@ class App extends React.Component {
                 <div className="toolbar">
                     <>
                     <CommentBox
-                        position={this.state.cursorPosition}
                         content={this.state.currentContent}
                         comments={this.state.currentComments}
+                        commentsAreHidden={this.state.hideComments}
                         toggleShowComments={this.toggleShowComments}
-                        addComment={this.addComment}
-                        codeMode={this.state.codeMode}/>
+                        addCommentToContent={this.addCommentToContent}
+                        cleanUpComments={this.cleanUpComments}
+                        codeMode={this.state.codeMode}
+                        setFlashMessage={this.setFlashMessage}/>
                     <div id="manage-allowed-users"></div>
                     <CodeModeBox
                         elementId="codemodebox"
