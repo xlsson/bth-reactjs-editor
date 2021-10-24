@@ -112,9 +112,9 @@ class App extends React.Component {
             currentTitle: doc.title,
             currentContent: doc.content,
             currentAllowedUsers: doc.allowedusers,
-            currentComments: [],
+            currentComments: doc.comments,
             message: {
-                text: `Loaded document "${doc.filename}" from database.`,
+                text: `Loaded document "${doc.filename}".`,
                 type: "ok"
             }
         }, () => {
@@ -149,7 +149,7 @@ class App extends React.Component {
                 currentOwnerEmail: ownerEmail,
                 activateShareIcon: true,
                 message: {
-                    text: "Document saved to database.",
+                    text: "Document saved.",
                     type: "ok"
                 }
             });
@@ -185,7 +185,7 @@ class App extends React.Component {
         }
 
         this.setFlashMessage({
-            text: "Changes saved to database.",
+            text: "Changes saved.",
             type: "ok"
         });
         return;
@@ -239,7 +239,6 @@ class App extends React.Component {
 
         //If filename is blank, do not save
         if (this.state.currentFilename.length === 0) {
-
             this.setFlashMessage({
                 text: "Not saved. Filename cannot be blank.",
                 type: "error"
@@ -258,6 +257,7 @@ class App extends React.Component {
                     code: this.state.codeMode,
                     title: this.state.currentTitle,
                     content: this.state.currentContent,
+                    comments: this.state.currentComments,
                     email: this.state.currentUserEmail
                  }
             );
@@ -273,6 +273,7 @@ class App extends React.Component {
                     filename: this.state.currentFilename,
                     title: this.state.currentTitle,
                     content: this.state.currentContent,
+                    comments: this.state.currentComments
                  }
             );
             return;
@@ -463,8 +464,10 @@ class App extends React.Component {
     }
 
     afterInvite = (data) => {
-        // Lägg till en message box?
-        console.log("after invite: ", data.inviteSent);
+        this.setFlashMessage({
+            text: "Invite sent.",
+            type: "ok"
+        });
     }
 
     clearStateAfterLogout = () => {

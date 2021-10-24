@@ -17,7 +17,7 @@ function backend(request, baseUrl, callback, params = {}) {
     }
 
     if (request === "readone") {
-        let query = `{ doc (filename: "${params.filename}") { filename, title, content, allowedusers, ownerName, ownerEmail } }`;
+        let query = `{ doc (filename: "${params.filename}") { filename, title, content, allowedusers, ownerName, ownerEmail, comments { nr, text } } }`;
         requestOptions.body = JSON.stringify({ query: query });
         sendRequest(url, callback, requestOptions);
         return;
@@ -43,6 +43,7 @@ function backend(request, baseUrl, callback, params = {}) {
                 code: params.code,
                 title: params.title,
                 content: params.content,
+                comments: params.comments,
                 email: params.email
              })
         };
@@ -61,9 +62,11 @@ function backend(request, baseUrl, callback, params = {}) {
             body: JSON.stringify({
                 filename: params.filename,
                 title: params.title,
-                content: params.content
+                content: params.content,
+                comments: params.comments
              })
         };
+        console.log(params.comments);
         sendRequest(url, callback, requestOptions);
         return;
     }
