@@ -79,40 +79,28 @@ class CommentBox extends React.Component {
         }
 
         let eyeIcon = "visibility_off";
+        let labelShowHide = "Hide";
         if (this.props.commentsAreHidden) {
+            labelShowHide = "Show";
             eyeIcon = "visibility";
         }
 
         return (
-            <div className="flex-row align-items-end">
+
             <>
             <div className="flex-column">
                 <>
-                <p className="comment-title">List of comments</p>
+                <p className="comment-title">{labelShowHide}</p>
                 <div className="comment-wrapper flex-row">
-                    <>
-                        <select
-                            className="select select-comment"
-                            onClick={this.handleSelectClick}
-                            disabled={dropdownDisabled}>
-                            {this.props.comments.map((comment, i) => (
-                                <option
-                                    key={i}
-                                    value={comment.nr}>
-                                        [{comment.nr}] "{comment.text}"
-                                    </option>
-                            ))}
-                        </select>
-                        <p
-                            className={`material-icons comment-icon ${inactiveIcon}`}
-                            onClick={this.toggleShowComments}>{eyeIcon}</p>
-                    </>
+                    <p
+                        className={`material-icons comment-icon ${inactiveIcon}`}
+                        onClick={this.toggleShowComments}>{eyeIcon}</p>
                 </div>
                 </>
             </div>
             <div className="flex-column">
                 <>
-                <p className="comment-title">Add comment</p>
+                <p className="comment-title">Add comment at cursor</p>
                 <div className="comment-wrapper flex-row">
                 <>
                     <input
@@ -130,8 +118,28 @@ class CommentBox extends React.Component {
                 </div>
                 </>
             </div>
+            <div className="flex-column">
+                <>
+                <p className="comment-title">Comments list</p>
+                <div className="comment-wrapper flex-row">
+                    <select
+                        className="select select-comment"
+                        onClick={this.handleSelectClick}
+                        disabled={dropdownDisabled}>
+                        {this.props.comments.map((comment, i) => (
+                            <option
+                                key={i}
+                                value={comment.nr}>
+                                    [{comment.nr}] "{comment.text}"
+                                </option>
+                        ))}
+                    </select>
+                </div>
+                </>
+            </div>
+
             </>
-        </div>
+
         );
     }
 }

@@ -231,7 +231,7 @@ tr.share:nth-child(even) {
 .comment-icon {
     color: #000;
     font-size: 1.9em;
-    margin: 0 0.4em 0 0;
+    margin: 0;
     cursor: pointer;
 }
 
@@ -308,7 +308,7 @@ tr.share:nth-child(even) {
 .code-editor-result {
     margin: 0 0 1em;
     background-color: #fff;
-    min-height: 100px;
+    min-height: 136px;
     border: 1px solid #ccc;
     border-radius: 4px;
     text-align: left;
@@ -357,6 +357,10 @@ tr.share:nth-child(even) {
 
 .justify-content-space-between {
     justify-content: space-between;
+}
+
+.justify-evenly {
+    justify-content: space-evenly;
 }
 
 .textaligncenter {
@@ -413,6 +417,8 @@ tr.share:nth-child(even) {
 .select,
 .input {
     padding: 0.5em 0.5em;
+    box-sizing: border-box;
+    height: 2.25em;
     border: none;
     border-radius: 4px;
     background-color: #fff;
@@ -423,10 +429,12 @@ tr.share:nth-child(even) {
 
 .input-comment {
     min-width: 150px;
+    margin: 0;
 }
 
 .select-comment {
     min-width: 300px;
+    margin: 0;
 }
 
 .select:disabled,

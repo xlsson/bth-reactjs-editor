@@ -18,7 +18,6 @@ import backend from './functions/Backend.js';
 import pdfPrint from './functions/PdfPrint.js';
 import socketIOClient from "socket.io-client";
 
-
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/neo.css';
 
@@ -50,7 +49,7 @@ class App extends React.Component {
             allowedDocs: [],
             activateShareIcon: false,
             codeMode: false,
-            hideComments: true,
+            hideComments: false,
             codeOutput: "",
             currentComments: [],
             accountLinkText: "Login/register",
@@ -113,6 +112,7 @@ class App extends React.Component {
             currentContent: doc.content,
             currentAllowedUsers: doc.allowedusers,
             currentComments: doc.comments,
+            hideComments: false,
             message: {
                 text: `Loaded document "${doc.filename}".`,
                 type: "ok"
@@ -219,8 +219,11 @@ class App extends React.Component {
         }
 
         if (!this._isSaved) { return; }
+
         data.room = this.state.currentFilename;
+        data.comments = this.state.currentComments;
         socket.emit("send", data);
+
         return;
     }
 
@@ -560,7 +563,12 @@ class App extends React.Component {
     toggleCodeMode = () => {
         // Set codeMode to opposite value of the current value
         let codeMode = !this.state.codeMode;
-
+        let msgText;
+        if (codeMode) {
+            msgText = "Switched to code mode.";
+        } else {
+            msgText = "Switched to text mode.";
+        }
         // Clear all state except login details: user email, name and token
         this._isSaved = false;
         this.setState({
@@ -574,7 +582,11 @@ class App extends React.Component {
             currentAllowedUsers: [],
             selectedFile: '',
             allowedDocs: [],
-            activateShareIcon: false
+            activateShareIcon: false,
+            message: {
+                text: msgText,
+                type: "ok"
+            }
         }, () => {
             if (this.state.token) {
                 // get all documents where user is allowed, based on mode
@@ -675,7 +687,11 @@ class App extends React.Component {
     afterExecuteCode = (data) => {
         let result = atob(data.data);
         this.setState({
-            codeOutput: result
+            codeOutput: result,
+            message: {
+                text: "Code executed.",
+                type: "ok"
+            }
         });
     }
 
@@ -795,7 +811,7 @@ class App extends React.Component {
                             classes="red"
                             elementId="buttonSave"
                             label="SAVE"
-                            onClick={this.handleClickSave} />
+                            onClick={() => this.cleanUpComments(this.handleClickSave)} />
                     </div>
                     </>
                 </div>
@@ -843,7 +859,8 @@ class App extends React.Component {
                     this._isFromRemote = true;
                     this.setState({
                         currentTitle: data.title,
-                        currentContent: data.content
+                        currentContent: data.content,
+                        currentComments: data.comments
                     });
                 });
             });

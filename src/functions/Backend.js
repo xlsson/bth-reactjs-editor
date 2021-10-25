@@ -66,7 +66,6 @@ function backend(request, baseUrl, callback, params = {}) {
                 comments: params.comments
              })
         };
-        console.log(params.comments);
         sendRequest(url, callback, requestOptions);
         return;
     }
