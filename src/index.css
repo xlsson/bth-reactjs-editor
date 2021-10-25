@@ -81,8 +81,8 @@ body {
 
 .flash-message-error {
     width: 300px;
-    min-height: 17px;
-    margin: 1em auto;
+    min-height: 18px;
+    margin: 1em auto 0;
     padding: 0.5em;
     border: 1px solid #B7094C;
     background-color: rgba(183, 9, 76, 0.15);
@@ -93,8 +93,8 @@ body {
 
 .flash-message-ok {
     width: 300px;
-    min-height: 17px;
-    margin: 1em auto;
+    min-height: 18px;
+    margin: 1em auto 0;
     padding: 0.5em;
     border: 1px solid #0091AD;
     background-color: rgba(0, 145, 173, 0.15);
@@ -105,9 +105,10 @@ body {
 
 .flash-message-hidden {
     width: 300px;
-    min-height: 17px;
-    margin: 1em auto;
+    min-height: 18px;
+    margin: 1em auto 0;
     padding: 0.5em;
+    border: 1px solid #eee;
 }
 
 .header-wrapper {
