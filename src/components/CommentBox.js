@@ -1,5 +1,7 @@
 import React from 'react';
 
+const textToImage = require('text-to-image');
+
 class CommentBox extends React.Component {
     constructor(props) {
         super(props);
@@ -10,7 +12,7 @@ class CommentBox extends React.Component {
 
     }
 
-    addComment = () => {
+    addComment = async () => {
         if (this.props.codeMode) { return; };
 
         if (this.state.currentComment.length === 0) {
@@ -25,7 +27,20 @@ class CommentBox extends React.Component {
 
         let commentId = allComments[allComments.length-1].nr;
 
-        let commentTag = this.createCommentTag(commentId);
+        let image = await textToImage.generate(`${commentId}`, {
+            maxWidth: 20,
+            customHeight: 15,
+            fontSize: 14,
+            fontFamily: 'monospace',
+            fontWeight: 'bold',
+            lineHeight: 0,
+            margin: 2,
+            bgColor: '#fff',
+            textColor: '#2E6F95',
+            verticalAlign: 'center'
+        });
+
+        let commentTag = this.createCommentTag(commentId, image);
 
         this.props.editor.execCommand('mceInsertContent', false, commentTag);
 
@@ -41,13 +56,11 @@ class CommentBox extends React.Component {
         return;
     }
 
-    createCommentTag = (commentId) => {
+    createCommentTag = (commentId, image) => {
         let hidden = ``;
         if (this.props.commentsAreHidden) { hidden = `hidden="true"`; }
 
-        let commentTag = `
-         <span class="comment" id="comment${commentId}" style="color: #f00;" ${hidden}>
-        [${commentId}]</span>`;
+        let commentTag = `<img src="${image}" id="comment${commentId}" ${hidden}>`;
 
         return commentTag;
     }
