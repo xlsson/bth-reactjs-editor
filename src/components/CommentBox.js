@@ -39,7 +39,7 @@ class CommentBox extends React.Component {
         let comment = { nr: 1, text: commentText };
 
         if (allComments.length > 0) {
-            comment.nr = allComments.at(-1).nr + 1;
+            comment.nr = allComments[allComments.length-1].nr + 1;
         }
 
         allComments.push(comment);

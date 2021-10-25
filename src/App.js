@@ -608,7 +608,7 @@ class App extends React.Component {
     // Adds a comment to the content
     addCommentToContent = (allComments) => {
         // Get the latest = highest comment nr
-        let commentId = allComments.at(-1).nr;
+        let commentId = allComments[allComments.length-1].nr;
 
         let hidden = ``;
         if (this.state.hideComments) { hidden = `hidden="true"`; }
