@@ -47,7 +47,7 @@ class CommentBox extends React.Component {
 
         let commentTag = `
          <span class="comment" id="comment${commentId}" style="color: #f00;" ${hidden}>
-        [${commentId}]</span> `;
+        [${commentId}]</span>`;
 
         return commentTag;
     }
