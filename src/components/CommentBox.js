@@ -9,10 +9,9 @@ class CommentBox extends React.Component {
         };
 
     }
+
     addComment = () => {
-        if (this.props.codeMode) {
-            return;
-        };
+        if (this.props.codeMode) { return; };
 
         if (this.state.currentComment.length === 0) {
             this.props.setFlashMessage({
@@ -21,17 +20,36 @@ class CommentBox extends React.Component {
             });
             return;
         };
+
         let allComments = this.addCommentToArray(this.state.currentComment);
+
+        let commentId = allComments[allComments.length-1].nr;
+
+        let commentTag = this.createCommentTag(commentId);
+
+        this.props.editor.execCommand('mceInsertContent', false, commentTag);
+
+        this.props.addCommentToDropDown(allComments);
+
+        this.props.setFlashMessage({
+            text: "Comment was added",
+            type: "ok"
+        });
 
         this.setState({ currentComment: '' });
 
-            this.props.setFlashMessage({
-                text: "Comment was added",
-                type: "ok"
-            });
-
-        this.props.addCommentToContent(allComments);
         return;
+    }
+
+    createCommentTag = (commentId) => {
+        let hidden = ``;
+        if (this.props.commentsAreHidden) { hidden = `hidden="true"`; }
+
+        let commentTag = `
+         <span class="comment" id="comment${commentId}" style="color: #f00;" ${hidden}>
+        [${commentId}]</span> `;
+
+        return commentTag;
     }
 
     addCommentToArray = (commentText) => {
@@ -86,7 +104,6 @@ class CommentBox extends React.Component {
         }
 
         return (
-
             <>
             <div className="flex-column">
                 <>
@@ -137,9 +154,7 @@ class CommentBox extends React.Component {
                 </div>
                 </>
             </div>
-
             </>
-
         );
     }
 }

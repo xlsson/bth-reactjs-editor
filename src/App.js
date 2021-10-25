@@ -227,7 +227,7 @@ class App extends React.Component {
         return;
     }
 
-    handleDropDownChange = (filename) => {
+    handleFilesDropDownChange = (filename) => {
         this.setState({
             selectedFile: filename
         });
@@ -605,20 +605,8 @@ class App extends React.Component {
         });
     }
 
-    // Adds a comment to the content
-    addCommentToContent = (allComments) => {
-        // Get the latest = highest comment nr
-        let commentId = allComments[allComments.length-1].nr;
-
-        let hidden = ``;
-        if (this.state.hideComments) { hidden = `hidden="true"`; }
-
-        let commentTag = `
-         <span class="comment" id="comment${commentId}" style="color: #f00;" ${hidden}>
-        [${commentId}]</span> `;
-
-        this._editor.execCommand('mceInsertContent', false, commentTag);
-
+    // Adds a comment to comments list
+    addCommentToDropDown = (allComments) => {
         this.setState({
             currentComments: allComments
         });
@@ -665,9 +653,7 @@ class App extends React.Component {
     }
 
     setFlashMessage = (message={ text: "", type: "hidden" }) => {
-        this.setState({
-            message: message
-        });
+        this.setState({ message: message });
     }
 
     executeCode = () => {
@@ -791,7 +777,7 @@ class App extends React.Component {
                             elementId="fileDropdown"
                             codeMode={this.state.codeMode}
                             availableFiles={this.state.allowedDocs}
-                            onChange={this.handleDropDownChange}/>
+                            onChange={this.handleFilesDropDownChange}/>
                         <Button
                             classes=""
                             elementId="buttonLoad"
@@ -829,11 +815,12 @@ class App extends React.Component {
                 <div className="toolbar">
                     <>
                     <CommentBox
+                        editor={this._editor}
                         content={this.state.currentContent}
                         comments={this.state.currentComments}
                         commentsAreHidden={this.state.hideComments}
                         toggleShowComments={this.toggleShowComments}
-                        addCommentToContent={this.addCommentToContent}
+                        addCommentToDropDown={this.addCommentToDropDown}
                         cleanUpComments={this.cleanUpComments}
                         codeMode={this.state.codeMode}
                         setFlashMessage={this.setFlashMessage}/>
