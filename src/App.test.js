@@ -27,7 +27,7 @@ test('User logging in produces expected status message', async () => {
   const passwordField = await document.getElementById('passwordInputField');
   const loginButton = await document.getElementById('buttonLogin');
 
-  userEvent.type(emailField, "kalle@fakeadress.se");
+  userEvent.type(emailField, "nisse@fakeadress.se");
   userEvent.type(passwordField, "password");
   userEvent.click(loginButton);
 
