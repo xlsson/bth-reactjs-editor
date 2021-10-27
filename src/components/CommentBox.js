@@ -137,7 +137,7 @@ class CommentBox extends React.Component {
                     <input
                         className="input input-comment"
                         type="text"
-                        maxlength="30"
+                        maxLength="30"
                         value={this.state.currentComment}
                         onChange={this.handleCommentChange}
                         disabled={inputDisabled}>
