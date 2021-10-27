@@ -3,7 +3,7 @@ import React from 'react';
 class HeaderIcon extends React.Component {
     handleClick = () => {
         if (this.props.active) {
-            this.props.onClick("open");
+            this.props.onClick();
         }
     }
 

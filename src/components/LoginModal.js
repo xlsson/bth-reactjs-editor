@@ -1,5 +1,6 @@
 import React from 'react';
 import TextInputField from './TextInputField.js';
+import ErrorBox from './ErrorBox.js';
 import Button from './Button.js';
 
 class LoginModal extends React.Component {
@@ -8,7 +9,9 @@ class LoginModal extends React.Component {
 
         this.state = {
             email: "",
-            password: ""
+            password: "",
+            errors: false,
+            messages: []
         }
     }
 
@@ -22,22 +25,61 @@ class LoginModal extends React.Component {
     }
 
     confirm = () => {
-        this.props.loginModal("close");
-        this.props.loginAttempt(
-            this.state.email,
-            this.state.password
-        );
+        let email = this.state.email;
+        let emailIsValid = this.props.regexCheck(email);
+        console.log("emailIsValid :", emailIsValid);
+        let passwordExists = (this.state.password.length > 0);
+
+        let errors = 0;
+        let messages = [];
+
+        if (!emailIsValid) {
+            messages.push("E-mail is invalid");
+            errors += 1;
+        }
+        if (!passwordExists) {
+            messages.push("Password-field is empty");
+            errors += 1;
+        }
+
+        if (errors === 0) {
+            this.props.loginModal("close");
+            this.props.loginAttempt({
+                email: email,
+                password: this.state.password
+            });
+            return;
+        }
+
+        this.setState({
+            errors: true,
+            messages: messages
+        });
     }
 
     handleTextInputChange = (ev, field) => {
         if (field === "email") {
-            this.setState({ email: ev });
+            this.setState({
+                email: ev,
+                errors: false
+             });
             return;
         }
         if (field === "password") {
-            this.setState({ password: ev });
+            this.setState({
+                password: ev,
+                errors: false
+             });
             return;
         }
+    }
+
+    renderErrorMessage = () => {
+        return (
+            <div id="register-message-wrapper">
+                <ErrorBox message={this.state.messages}/>
+            </div>
+        );
     }
 
     render() {
@@ -58,6 +100,7 @@ class LoginModal extends React.Component {
                             name="password"
                             value={this.state.password}
                             onChange={(ev) => this.handleTextInputChange(ev, "password")}/>
+                        {this.state.errors && this.renderErrorMessage()}
                         <p className="modal-textlink" onClick={this.registerInstead}>
                             Register instead
                         </p>

@@ -1,5 +1,4 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 import ErrorBox from './ErrorBox.js';
 import TextInputField from './TextInputField.js';
 import Button from './Button.js';
@@ -11,7 +10,9 @@ class RegisterModal extends React.Component {
         this.state = {
             email: "",
             name: "",
-            password: ""
+            password: "",
+            errors: false,
+            messages: []
         };
     }
 
@@ -26,23 +27,24 @@ class RegisterModal extends React.Component {
 
     confirm = () => {
         let email = this.state.email;
-        let emailIsValid = this.props.checkEmailValid(email);
+        let emailIsValid = this.props.regexCheck(email);
+        console.log("emailIsValid :", emailIsValid);
         let nameExists = (this.state.name.length > 0);
-        let passwordExists = (this.state.name.length > 0);
+        let passwordExists = (this.state.password.length > 0);
 
         let errors = 0;
-        let message = [];
+        let messages = [];
 
         if (!emailIsValid) {
-            message.push("E-mail is invalid");
+            messages.push("E-mail is invalid");
             errors += 1;
         }
         if (!nameExists) {
-            message.push("Name-field is empty");
+            messages.push("Name-field is empty");
             errors += 1;
         }
         if (!passwordExists) {
-            message.push("Password-field is empty");
+            messages.push("Password-field is empty");
             errors += 1;
         }
 
@@ -56,43 +58,42 @@ class RegisterModal extends React.Component {
             return;
         }
 
-        this.errorMessage("show", message);
-        return;
-    }
-
-    errorMessage = (action, message=[]) => {
-        let div = document.getElementById("register-message-wrapper");
-        if (action === "show") {
-            let emailInput = document.getElementById('email-input-field');
-            emailInput.classList.add("error-border");
-            ReactDOM.render(
-                <ErrorBox
-                    message={message}/>
-                    ,div
-                );
-            return;
-        }
-
-        let emailInput = document.getElementById('email-input-field');
-        emailInput.classList.remove("error-border");
-        ReactDOM.unmountComponentAtNode(div);
-        return;
+        this.setState({
+            errors: true,
+            messages: messages
+        });
     }
 
     handleTextInputChange = (ev, field) => {
         if (field === "email") {
-            this.errorMessage("hide");
-            this.setState({ email: ev });
+            this.setState({
+                email: ev,
+                errors: false
+             });
             return;
         }
         if (field === "name") {
-            this.setState({ name: ev });
+            this.setState({
+                name: ev,
+                errors: false
+             });
             return;
         }
         if (field === "password") {
-            this.setState({ password: ev });
+            this.setState({
+                password: ev,
+                errors: false
+             });
             return;
         }
+    }
+
+    renderErrorMessage = () => {
+        return (
+            <div id="register-message-wrapper">
+                <ErrorBox message={this.state.messages}/>
+            </div>
+        );
     }
 
     render() {
@@ -119,7 +120,7 @@ class RegisterModal extends React.Component {
                                 name="password"
                                 value={this.state.password}
                                 onChange={(ev) => this.handleTextInputChange(ev, "password")}/>
-                            <div id="register-message-wrapper"></div>
+                            {this.state.errors && this.renderErrorMessage()}
                             <p className="modal-textlink" onClick={this.loginInstead}>
                                 Login instead
                             </p>

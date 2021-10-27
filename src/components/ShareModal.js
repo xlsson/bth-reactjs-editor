@@ -87,7 +87,7 @@ class ShareModal extends React.Component {
     }
 
     cancel = () => {
-        this.props.shareModal("close");
+        this.props.shareModal();
     }
 
     // Confirm selection: check that the new e-mail (if any) fulfills the
@@ -98,7 +98,7 @@ class ShareModal extends React.Component {
         const inviteEmail = this.state.inviteEmail;
 
         if (inviteEmail.length > 0) {
-            const emailIsValid = this.props.checkEmailValid(inviteEmail);
+            const emailIsValid = this.props.regexCheck(inviteEmail);
 
             if (!emailIsValid) {
                 this.errorMessage("show", ["E-mail not formatted correctly"]);
@@ -125,7 +125,7 @@ class ShareModal extends React.Component {
         });
         updatedList.push(this.props.currentUserEmail);
 
-        this.props.shareModal("close");
+        this.props.shareModal();
 
         this.props.updateUsers(updatedList);
     }

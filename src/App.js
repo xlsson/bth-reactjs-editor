@@ -62,10 +62,12 @@ class App extends React.Component {
     }
 
     // Checks that email is a valid e-mail address
-    checkEmailValid = (email) => {
-        const regex = new RegExp(/^[a-zA-Z0-9]+@(?:[a-zA-Z0-9]+\.)+[A-Za-z]+$/);
-        const emailIsValid = regex.test(email);
-
+    regexCheck = (email) => {
+        console.log("email: ", email);
+        const regex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        const check = new RegExp(regex);
+        const emailIsValid = check.test(email);
+        console.log("emailIsValid app: ", emailIsValid);
         return emailIsValid;
     }
 
@@ -285,19 +287,24 @@ class App extends React.Component {
     }
 
     handleClickLoad = () => {
-        if (this.state.token.length > 0) {
-            let params = {
-                token: this.state.token,
-                filename: this.state.selectedFile
-            };
-            backend(
-                "readone",
-                ENDPOINT,
-                this.afterReadOne,
-                params
-            );
+        //If user is not logged in, clicking load instead opens login window
+        if (this.state.token.length === 0) {
+            this.loginModal("open");
             return;
-        }
+        };
+
+        let params = {
+            token: this.state.token,
+            filename: this.state.selectedFile
+        };
+        backend(
+            "readone",
+            ENDPOINT,
+            this.afterReadOne,
+            params
+        );
+        return;
+
     }
 
     handleClickClear = () => {
@@ -330,7 +337,7 @@ class App extends React.Component {
             ReactDOM.render(
                 <RegisterModal
                     registerModal={this.registerModal}
-                    checkEmailValid={this.checkEmailValid}
+                    regexCheck={this.regexCheck}
                     loginModal={this.loginModal}
                     loginAttempt={this.loginAttempt}
                     registerUser={this.registerUser}/>,
@@ -376,6 +383,7 @@ class App extends React.Component {
             ReactDOM.render(
                 <LoginModal
                     loginModal={this.loginModal}
+                    regexCheck={this.regexCheck}
                     loginAttempt={this.loginAttempt}
                     registerModal={this.registerModal}/>,
                 document.getElementById('modal')
@@ -415,8 +423,8 @@ class App extends React.Component {
                 allUsers={allUsers}
                 allowedUsers={this.state.currentAllowedUsers}
                 currentUserEmail={this.state.currentUserEmail}
-                checkEmailValid={this.checkEmailValid}
-                shareModal={this.shareModal}
+                regexCheck={this.regexCheck}
+                shareModal={() => this.shareModal("close")}
                 sendInvite={this.sendInvite}
                 updateUsers={this.updateUsers}/>,
             document.getElementById('manage-allowed-users')
@@ -754,11 +762,11 @@ class App extends React.Component {
                             icon="group_add"
                             active={this.state.activateShareIcon}
                             label="Share"
-                            onClick={this.shareModal}/>
+                            onClick={() => this.shareModal("open")}/>
                         <HeaderIcon
                             elementId="accounticon"
                             icon="account_circle"
-                            active="true"
+                            active={true}
                             label={this.state.accountLinkText}
                             onClick={() => this.loginModal("open")}/>
                     </ul>
