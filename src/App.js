@@ -714,13 +714,8 @@ class App extends React.Component {
                             'searchreplace visualblocks code',
                             'insertdatetime media table paste wordcount'
                         ],
-                        toolbar:
-                            'undo redo | formatselect | bold italic | \
-                            alignleft aligncenter alignright | \
-                            bullist numlist outdent indent | help',
-                      setup: (editor) => {
-                          this._editor = editor;
-                      }
+                        toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright | bullist numlist outdent indent | help',
+                        setup: (editor) => { this._editor = editor; }
                     }}
                     onEditorChange={(ev) => this.handleTextInputChange(ev, "content")}/>
             </div>
