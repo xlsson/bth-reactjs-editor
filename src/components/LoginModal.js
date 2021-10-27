@@ -26,8 +26,7 @@ class LoginModal extends React.Component {
 
     confirm = () => {
         let email = this.state.email;
-        let emailIsValid = this.props.regexCheck(email);
-        console.log("emailIsValid :", emailIsValid);
+        let emailIsValid = this.props.regexCheck("email", email);
         let passwordExists = (this.state.password.length > 0);
 
         let errors = 0;
@@ -44,10 +43,7 @@ class LoginModal extends React.Component {
 
         if (errors === 0) {
             this.props.loginModal("close");
-            this.props.loginAttempt({
-                email: email,
-                password: this.state.password
-            });
+            this.props.loginAttempt(email, this.state.password);
             return;
         }
 

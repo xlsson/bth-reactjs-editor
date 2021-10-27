@@ -1,7 +1,5 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 import InviteFriend from './InviteFriend.js';
-import InviteFriendLink from './InviteFriendLink.js';
 import ErrorBox from './ErrorBox.js';
 import Button from './Button.js';
 
@@ -11,11 +9,14 @@ class ShareModal extends React.Component {
 
         this.state = {
             users: [],
-            inviteEmail: ""
+            inviteEmail: "",
+            inviteFriend: false,
+            error: false,
+            messages: []
         };
     }
 
-    handleChange = (i) => {
+    handleCheckChange = (i) => {
         let oldValue = this.state.users[i].checked;
         let checked = !oldValue;
 
@@ -32,57 +33,26 @@ class ShareModal extends React.Component {
         });
     }
 
-    inviteFriend = (action) => {
-        let inviteWrapper = document.getElementById("invite-friend-wrapper");
+    toggleInviteFriend = (action) => {
         if (action === "open") {
-            ReactDOM.render(
-                <InviteFriend
-                    handleInviteEmail={this.handleInviteEmail}
-                    close={this.inviteFriend}/>
-                    ,inviteWrapper
-                );
+            this.setState({
+                inviteFriend: true
+            });
             return;
         }
 
-        // Set inviteEmail to "", close input field, remove error msg, display link
         this.setState({
-            inviteEmail: ""
+            inviteFriend: false,
+            error: false
         });
-        ReactDOM.unmountComponentAtNode(inviteWrapper);
-        this.errorMessage("hide");
-        ReactDOM.render(
-            <InviteFriendLink
-                inviteFriend={this.inviteFriend}/>
-                ,inviteWrapper
-            );
-        return;
-    }
-
-    errorMessage = (action, message=[]) => {
-        let div = document.getElementById("invite-message-wrapper");
-        if (action === "show") {
-            let inviteInput = document.getElementById('invite-input');
-            inviteInput.classList.add("error-border");
-            ReactDOM.render(
-                <ErrorBox
-                    message={message}/>
-                    ,div
-                );
-            return;
-        }
-
-        let inviteInput = document.getElementById('invite-input');
-        if (inviteInput) {
-            inviteInput.classList.remove("error-border");
-        }
-        ReactDOM.unmountComponentAtNode(div);
         return;
     }
 
     handleInviteEmail = (e) => {
-        this.errorMessage("hide");
         this.setState({
-            inviteEmail: e.target.value
+            inviteEmail: e.target.value,
+            error: false,
+            messages: []
         });
     }
 
@@ -98,17 +68,23 @@ class ShareModal extends React.Component {
         const inviteEmail = this.state.inviteEmail;
 
         if (inviteEmail.length > 0) {
-            const emailIsValid = this.props.regexCheck(inviteEmail);
+            const emailIsValid = this.props.regexCheck("email", inviteEmail);
 
             if (!emailIsValid) {
-                this.errorMessage("show", ["E-mail not formatted correctly"]);
+                this.setState({
+                    error: true,
+                    messages: ["E-mail not formatted correctly"]
+                });
                 return;
             }
 
             const userExists = this.checkUserExists(inviteEmail);
 
             if (userExists) {
-                this.errorMessage("show", ["This user is already registered"]);
+                this.setState({
+                    error: true,
+                    messages: ["This user is already registered"]
+                });
                 return;
             }
 
@@ -125,6 +101,7 @@ class ShareModal extends React.Component {
         });
         updatedList.push(this.props.currentUserEmail);
 
+        // Close this modal
         this.props.shareModal();
 
         this.props.updateUsers(updatedList);
@@ -144,6 +121,39 @@ class ShareModal extends React.Component {
     // Call function to send an e-mail invite
     sendInvite = (inviteEmail) => {
         this.props.sendInvite(inviteEmail);
+    }
+
+    renderInviteFriend = () => {
+        return (
+            <>
+            <div id="invite-friend-wrapper">
+                <InviteFriend
+                    handleInviteEmail={this.handleInviteEmail}
+                    toggleInviteFriend={() => this.toggleInviteFriend("close")}/>
+            </div>
+            <div id="invite-message-wrapper">
+                {this.state.error && this.renderErrorMessage()}
+            </div>
+            </>
+        );
+    }
+
+    renderInviteFriendLink = () => {
+        return (
+            <div id="invite-friend-wrapper">
+                <p className="modal-textlink" onClick={() => this.toggleInviteFriend("open")}>
+                    Click here to invite a new user
+                </p>
+            </div>
+        );
+    }
+
+    renderErrorMessage = () => {
+        return (
+            <div id="register-message-wrapper">
+                <ErrorBox message={this.state.messages}/>
+            </div>
+        );
     }
 
     render() {
@@ -172,7 +182,7 @@ class ShareModal extends React.Component {
                                                 key={i}
                                                 type="checkbox"
                                                 value={user.checked}
-                                                onChange={() => this.handleChange(i)}
+                                                onChange={() => this.handleCheckChange(i)}
                                                 checked={this.state.users[i].checked}>
                                             </input>
                                         </td>
@@ -183,12 +193,8 @@ class ShareModal extends React.Component {
                             </tbody>
                             </>
                         </table>
-                        <div id="invite-friend-wrapper">
-                            <InviteFriendLink
-                                inviteFriend={this.inviteFriend}/>
-                        </div>
-                        <div id="invite-message-wrapper">
-                        </div>
+                        {!this.state.inviteFriend && this.renderInviteFriendLink()}
+                        {this.state.inviteFriend && this.renderInviteFriend()}
                         <div className="flex-row modal-buttons">
                             <>
                             <Button

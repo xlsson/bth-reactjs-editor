@@ -62,13 +62,18 @@ class App extends React.Component {
     }
 
     // Checks that email is a valid e-mail address
-    regexCheck = (email) => {
-        console.log("email: ", email);
-        const regex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-        const check = new RegExp(regex);
-        const emailIsValid = check.test(email);
-        console.log("emailIsValid app: ", emailIsValid);
-        return emailIsValid;
+    regexCheck = (type, stringToValidate) => {
+        let expressions = {};
+
+        expressions.filename = /^[a-zA-Z0-9_]*$/;
+        expressions.email = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+        const check = new RegExp(expressions[type]);
+        const isValid = check.test(stringToValidate);
+
+        console.log("stringToValidate: ", stringToValidate ,"Type: ", type, "IsValid: ", isValid);
+
+        return isValid;
     }
 
     afterGetAllowedDocs = (data) => {
@@ -508,6 +513,7 @@ class App extends React.Component {
             email: email,
             password: password,
         };
+        console.log(params);
         backend(
             "verifylogin",
             ENDPOINT,

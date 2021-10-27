@@ -10,7 +10,7 @@ class InviteFriend extends React.Component {
                     <label className="field-title" htmlFor="">Invite to edit (e-mail)</label>
                     <p
                         className="material-icons cancel-icon"
-                        onClick={() => this.props.close("close")}>
+                        onClick={this.props.toggleInviteFriend}>
                         cancel
                     </p>
                     </>

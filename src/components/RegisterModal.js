@@ -27,8 +27,7 @@ class RegisterModal extends React.Component {
 
     confirm = () => {
         let email = this.state.email;
-        let emailIsValid = this.props.regexCheck(email);
-        console.log("emailIsValid :", emailIsValid);
+        let emailIsValid = this.props.regexCheck("email", email);
         let nameExists = (this.state.name.length > 0);
         let passwordExists = (this.state.password.length > 0);
 
