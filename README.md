@@ -1,4 +1,4 @@
-[![Build Status](https://app.travis-ci.com/xlsson/bth-reactjs-editor.svg?branch=main)](https://app.travis-ci.com/xlsson/bth-reactjs-editor)
+![Github Actions](https://github.com/xlsson/bth-reactjs-editor/actions/workflows/node.js.yml/badge.svg)
 
 ## CirrusDocs
 CirrusDocs is a single-page real-time collaborative document editor app, written in JavaScript utilising the React library. The app was created as a student project for the course JavaScript-based Web Frameworks at Blekinge Institute of Technology (BTH).
