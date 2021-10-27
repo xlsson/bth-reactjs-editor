@@ -29,7 +29,7 @@ class CommentBox extends React.Component {
 
         let image = await textToImage.generate(`${commentId}`, {
             maxWidth: 20,
-            customHeight: 15,
+            customHeight: 12,
             fontSize: 14,
             fontFamily: 'monospace',
             fontWeight: 'bold',
@@ -99,6 +99,9 @@ class CommentBox extends React.Component {
         let inactiveIcon = "";
         let dropdownDisabled = false;
         let inputDisabled = false;
+        let eyeIcon = "visibility";
+        let labelShowHide = "Hide";
+
         if (this.props.codeMode) {
             inactiveIcon = "inactive-icon";
             dropdownDisabled = true;
@@ -109,11 +112,9 @@ class CommentBox extends React.Component {
             dropdownDisabled = true;
         }
 
-        let eyeIcon = "visibility_off";
-        let labelShowHide = "Hide";
         if (this.props.commentsAreHidden) {
             labelShowHide = "Show";
-            eyeIcon = "visibility";
+            eyeIcon = "visibility_off";
         }
 
         return (

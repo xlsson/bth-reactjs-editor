@@ -11,7 +11,7 @@ class StatusField extends React.Component {
                         <div className="status-label">Document owner:</div>
                         </>
                     </div>
-                    <div className="flex-column">
+                    <div className="flex-column justify-flex-end">
                         <>
                         <div className="status-info">{this.props.currentUserEmail}</div>
                         <div className="status-info">{this.props.currentOwnerEmail}</div>

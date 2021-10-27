@@ -231,7 +231,7 @@ tr.share:nth-child(even) {
 
 .comment-icon {
     color: #000;
-    font-size: 1.9em;
+    font-size: 30px;
     margin: 0;
     cursor: pointer;
 }
@@ -266,7 +266,7 @@ tr.share:nth-child(even) {
 }
 
 .code-icon {
-    font-size: 1.9em;
+    font-size: 30px;
     margin: 0 0 0 0.4em;
     cursor: pointer;
 }
@@ -400,6 +400,7 @@ tr.share:nth-child(even) {
 
 .status-label {
     font-size: 0.8em;
+    line-height: 1em;
     color: #777;
     text-align: right;
     padding: 0 0 0.2em 0.5em;
@@ -408,6 +409,7 @@ tr.share:nth-child(even) {
 
 .status-info {
     font-size: 0.8em;
+    line-height: 1em;
     color: #777;
     text-align: left;
     font-weight: bold;
@@ -472,6 +474,7 @@ tr.share:nth-child(even) {
     color: white;
     font-weight: bold;
     font-size: 0.8em;
+    line-height: 0.8em;
     height: 2.8em;
     padding: 10px 14px;
     margin: 0;
