@@ -71,8 +71,6 @@ class App extends React.Component {
         const check = new RegExp(expressions[type]);
         const isValid = check.test(stringToValidate);
 
-        console.log("stringToValidate: ", stringToValidate ,"Type: ", type, "IsValid: ", isValid);
-
         return isValid;
     }
 
@@ -214,8 +212,6 @@ class App extends React.Component {
         if (fieldName === "content") {
             this.setState({
                 currentContent: ev
-            }, () => {
-                console.log(this.state.currentContent);
             });
             data.title = this.state.currentTitle;
             data.content = ev;
@@ -244,6 +240,16 @@ class App extends React.Component {
         //If user is not logged in, clicking save instead opens login window
         if (this.state.token.length === 0) {
             this.loginModal("open");
+            return;
+        };
+
+        const filenameIsValid = this.regexCheck("filename", this.state.currentFilename);
+        //If filename is blank, do not save
+        if (!filenameIsValid) {
+            this.setFlashMessage({
+                text: "Not saved. Filename can be alphanumeric only.",
+                type: "error"
+            });
             return;
         };
 
@@ -461,11 +467,9 @@ class App extends React.Component {
     }
 
     sendInvite = (recipient) => {
-        console.log("send invite to: ", recipient);
-        console.log("overwritten with richard.axelsson@... during development");
         let params = {
             token: this.state.token,
-            recipient: "richard.axelsson@gmail.com",
+            recipient: recipient,
             inviterName: this.state.currentUserName,
             inviterEmail: this.state.currentUserEmail,
             filename: this.state.currentFilename,
@@ -513,7 +517,6 @@ class App extends React.Component {
             email: email,
             password: password,
         };
-        console.log(params);
         backend(
             "verifylogin",
             ENDPOINT,
