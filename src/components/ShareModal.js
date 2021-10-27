@@ -43,7 +43,8 @@ class ShareModal extends React.Component {
 
         this.setState({
             inviteFriend: false,
-            error: false
+            error: false,
+            inviteEmail: ""
         });
         return;
     }
