@@ -712,8 +712,7 @@ class App extends React.Component {
                             'advlist autolink lists link image',
                             'charmap print preview anchor help',
                             'searchreplace visualblocks code',
-                            'insertdatetime media table paste wordcount'
-                        ],
+                            'insertdatetime media table paste wordcount'],
                         toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright | bullist numlist outdent indent | help',
                         setup: (editor) => { this._editor = editor; }
                     }}
