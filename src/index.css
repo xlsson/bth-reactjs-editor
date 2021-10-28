@@ -52,6 +52,7 @@ body {
 
 .modal-box {
     margin: 30vh auto;
+    min-width: 350px;
     box-shadow: 0 4px 8px 0 rgba(0,0,0,0.3), 0 3px 10px 0 rgba(0,0,0,0.19);
     padding: 1em;
     background-color: #eee;
