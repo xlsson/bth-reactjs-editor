@@ -23,9 +23,52 @@ import 'codemirror/theme/neo.css';
 
 require('codemirror/mode/javascript/javascript');
 
+/**
+ * @type {String} ENDPOINT -    Base URL for the server
+ * @type {Object} socket -      socketIOClient instance
+ */
 const ENDPOINT = "https://jsramverk-editor-riax20.azurewebsites.net";
 const socket = socketIOClient(ENDPOINT);
 
+/**
+ * App class = root component for the CirrusDocs app
+ *
+ * @component
+ * @member {Boolean} _isMounted -               True if the component is mounted
+ * @member {Boolean} _isFromRemote -            True if input comes from web socket
+ * @member {Boolean} _isSave -                  True if document is already saved in the db
+ * @member {Object} _editor -                   TinyMCE editor instance
+ *
+ * @member {Object} state -                     State:
+ * @member {String} state.token -               JSON web token
+ * @member {String} state.currentUserName -     User name of logged in user
+ * @member {String} state.currentUserEmail -    Email of logged in user
+ * @member {String} state.currentFilename -     Filename of currently opened document
+ * @member {String} state.currentOwnerName -    Owner name of currently opened document
+ * @member {String} state.currentOwnerEmail -   Owner e-mail of currently opened document
+ * @member {String} state.currentTitle -        Title of currently opened document
+ * @member {String} state.currentContent -      Content of currently opened document
+ * @member {Array} state.currentAllowedUsers -  Array of users with editing rights
+ *                                              for the currently opened document
+ * @member {String} state.selectedFile -        The file last selected in the dropdown
+ * @member {Array} state.allowedDocs -          An array of all files where the
+ *                                              logged in user has editing rights, for
+ *                                              the current mode (code or text)
+ * @member {Boolean} state.activateShareIcon -  True if the user is allowed to
+ *                                              manage editing rights
+ * @member {Boolean} state.codeMode -           True = code mode, false = text mode
+ * @member {Boolean} state.hideComments -       True = comments are displayed,
+ *                                              false = comments are hidden
+ * @member {String} state.codeOutput -          Result of sending code to the
+ *                                              code API
+ * @member {Array} state.currentComments -      Array with all comments for the
+ *                                              current document.
+ * @member {String} state.accountLinkText -     The link text for the account icon
+ * @member {Object} state.message -             Message for the flash message box:
+ * @member {String} state.message.text -        Text for the flash message box
+ * @member {String} state.message.type -        Type of message = displayed
+ *                                              green/red/hidden
+ */
 class App extends React.Component {
     constructor(props) {
         super(props);
@@ -61,19 +104,14 @@ class App extends React.Component {
 
     }
 
-    // Checks that email is a valid e-mail address
-    regexCheck = (type, stringToValidate) => {
-        let expressions = {};
-
-        expressions.filename = /^[a-zA-Z0-9_]*$/;
-        expressions.email = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-
-        const check = new RegExp(expressions[type]);
-        const isValid = check.test(stringToValidate);
-
-        return isValid;
-    }
-
+    /**
+     * Handle result of server request for all documents the logged in user
+     * is allowed to edit.
+     *
+     * @param {object}  data                       Data from server request response:
+     * @param {object}  data.data.allowedDocs      Array of all filenames (strings) that
+     *                                             the logged in user is allowed to edit
+     */
     afterGetAllowedDocs = (data) => {
         if (data.tokenNotValid) {
             this.setFlashMessage({
@@ -96,6 +134,20 @@ class App extends React.Component {
         return;
     }
 
+    /**
+     * Handle result of reading a document = result of GraphQL request
+     *
+     * @param {object}  data                       Data from server request response:
+     * @param {object}  data.data.doc              Document properties:
+     * @param {string} data.data.doc.filename      Filename
+     * @param {boolean} data.data.doc.code         True = code mode, false text mode
+     * @param {string} data.data.doc.title         Title
+     * @param {string} data.data.doc.content       Content
+     * @param {array} data.data.doc.comments       Array of comments (objects)
+     * @param {array} data.data.doc.allowedusers   Array of allowed users (strings)
+     * @param {string} data.data.doc.ownerName     Owner name
+     * @param {string} data.data.doc.ownerEmail    Owner e-mail
+     */
     afterReadOne = (data) => {
         if (data.tokenNotValid) {
             this.setFlashMessage({
@@ -135,6 +187,133 @@ class App extends React.Component {
         });
     }
 
+    /**
+     * Handle text input change
+     *
+     * @param {object} ev         Event object where the change was recorded
+     * @param {string} fieldName  Name of field where change was made
+     */
+    handleTextInputChange = (ev, fieldName) => {
+        let data = {};
+
+        if (this._isFromRemote) {
+            this._isFromRemote = false;
+            return;
+        }
+
+        if (fieldName === "docInfoFilename") {
+            this.setState({ currentFilename: ev });
+            return;
+        }
+
+        if (fieldName === "content") {
+            this.setState({
+                currentContent: ev
+            });
+            data.title = this.state.currentTitle;
+            data.content = ev;
+        } else if (fieldName === "docInfoTitle") {
+            this.setState({ currentTitle: ev });
+            data.title = ev;
+            data.content = this.state.currentContent;
+        }
+
+        if (!this._isSaved) { return; }
+
+        data.room = this.state.currentFilename;
+        data.comments = this.state.currentComments;
+        socket.emit("send", data);
+
+        return;
+    }
+
+    /**
+     * Handle click on filename dropdown option = save selected option to state
+     *
+     * @param {string} filename  Selected filename
+     */
+    handleFilesDropDownChange = (filename) => {
+        this.setState({
+            selectedFile: filename
+        });
+    }
+
+    /**
+     * Handle click on "SAVE" button = save or update selected file, or open login modal
+     * if user is not logged in. Display error message if filename is already in use.
+     */
+    handleClickSave = () => {
+        /** If user is not logged in, clicking save instead opens login window */
+        if (this.state.token.length === 0) {
+            this.loginModal("open");
+            return;
+        };
+
+        const filenameIsValid = this.regexCheck("filename", this.state.currentFilename);
+        /** If filename is blank, do not save */
+        if (!filenameIsValid) {
+            this.setFlashMessage({
+                text: "Not saved. Filename can be alphanumeric only.",
+                type: "error"
+            });
+            return;
+        };
+
+        /** If filename is blank, do not save */
+        if (this.state.currentFilename.length === 0) {
+            this.setFlashMessage({
+                text: "Not saved. Filename cannot be blank.",
+                type: "error"
+            });
+            return;
+        };
+
+        /** If _isSaved flag isn't set, the document gets created in the db */
+        if (!this._isSaved) {
+            backend(
+                "create",
+                ENDPOINT,
+                this.afterCreateDoc, {
+                    token: this.state.token,
+                    filename: this.state.currentFilename,
+                    code: this.state.codeMode,
+                    title: this.state.currentTitle,
+                    content: this.state.currentContent,
+                    comments: this.state.currentComments,
+                    email: this.state.currentUserEmail
+                 }
+            );
+            return;
+        }
+        /** If _isSaved flag is set, the document gets updated in the db */
+        if (this._isSaved) {
+            backend(
+                "update",
+                ENDPOINT,
+                this.afterUpdate, {
+                    token: this.state.token,
+                    filename: this.state.currentFilename,
+                    title: this.state.currentTitle,
+                    content: this.state.currentContent,
+                    comments: this.state.currentComments
+                 }
+            );
+            return;
+        }
+
+    }
+
+    /**
+     * Handle result of creating a document.
+     *
+     * @param {object} data  Data from server request response:
+     * @param {boolean} data.tokenNotValid    User's token is valid = true
+     * @param {boolean} data.acknowledged     Successful operation = true
+     * @param {number}  data.modifiedCount    Number of modified records (always 1)
+     * @param {null}    data.upsertedId       Id of upserted record (always null)
+     * @param {number}  data.upsertedCount    Number of upserted records (always 0)
+     * @param {number}  data.matchedCount     Number of matching records (always 1)
+     */
     afterCreateDoc = (data) => {
         if (data.tokenNotValid) {
             this.setFlashMessage({
@@ -180,6 +359,17 @@ class App extends React.Component {
         return;
     }
 
+    /**
+     * Handle result of updating = saving changes to a document.
+     *
+     * @param {object} data  Data from server request response:
+     * @param {boolean} data.tokenNotValid    User's token is valid = true
+     * @param {boolean} data.acknowledged     Successful operation = true
+     * @param {number}  data.modifiedCount    Number of modified records (always 1)
+     * @param {null}    data.upsertedId       Id of upserted record (always null)
+     * @param {number}  data.upsertedCount    Number of upserted records (always 0)
+     * @param {number}  data.matchedCount     Number of matching records (always 1)
+     */
     afterUpdate = (data) => {
         if (data.tokenNotValid) {
             this.setFlashMessage({
@@ -196,107 +386,10 @@ class App extends React.Component {
         return;
     }
 
-    handleTextInputChange = (ev, fieldName) => {
-        let data = {};
-
-        if (this._isFromRemote) {
-            this._isFromRemote = false;
-            return;
-        }
-
-        if (fieldName === "docInfoFilename") {
-            this.setState({ currentFilename: ev });
-            return;
-        }
-
-        if (fieldName === "content") {
-            this.setState({
-                currentContent: ev
-            });
-            data.title = this.state.currentTitle;
-            data.content = ev;
-        } else if (fieldName === "docInfoTitle") {
-            this.setState({ currentTitle: ev });
-            data.title = ev;
-            data.content = this.state.currentContent;
-        }
-
-        if (!this._isSaved) { return; }
-
-        data.room = this.state.currentFilename;
-        data.comments = this.state.currentComments;
-        socket.emit("send", data);
-
-        return;
-    }
-
-    handleFilesDropDownChange = (filename) => {
-        this.setState({
-            selectedFile: filename
-        });
-    }
-
-    handleClickSave = () => {
-        //If user is not logged in, clicking save instead opens login window
-        if (this.state.token.length === 0) {
-            this.loginModal("open");
-            return;
-        };
-
-        const filenameIsValid = this.regexCheck("filename", this.state.currentFilename);
-        //If filename is blank, do not save
-        if (!filenameIsValid) {
-            this.setFlashMessage({
-                text: "Not saved. Filename can be alphanumeric only.",
-                type: "error"
-            });
-            return;
-        };
-
-        //If filename is blank, do not save
-        if (this.state.currentFilename.length === 0) {
-            this.setFlashMessage({
-                text: "Not saved. Filename cannot be blank.",
-                type: "error"
-            });
-            return;
-        };
-
-        //If _isSaved flag isn't set, the document gets created in the db
-        if (!this._isSaved) {
-            backend(
-                "create",
-                ENDPOINT,
-                this.afterCreateDoc, {
-                    token: this.state.token,
-                    filename: this.state.currentFilename,
-                    code: this.state.codeMode,
-                    title: this.state.currentTitle,
-                    content: this.state.currentContent,
-                    comments: this.state.currentComments,
-                    email: this.state.currentUserEmail
-                 }
-            );
-            return;
-        }
-        //If _isSaved flag is set, the document gets updated in the db
-        if (this._isSaved) {
-            backend(
-                "update",
-                ENDPOINT,
-                this.afterUpdate, {
-                    token: this.state.token,
-                    filename: this.state.currentFilename,
-                    title: this.state.currentTitle,
-                    content: this.state.currentContent,
-                    comments: this.state.currentComments
-                 }
-            );
-            return;
-        }
-
-    }
-
+    /**
+     * Handle click on "LOAD" button = load selected file, or open login modal
+     * if user is not logged in.
+     */
     handleClickLoad = () => {
         //If user is not logged in, clicking load instead opens login window
         if (this.state.token.length === 0) {
@@ -318,6 +411,10 @@ class App extends React.Component {
 
     }
 
+    /**
+     * Handle click on "CLEAR" button = clear state connected to the current
+     * document.
+     */
     handleClickClear = () => {
         socket.emit("leave", this.state.currentFilename);
         this._isSaved = false;
@@ -337,11 +434,11 @@ class App extends React.Component {
         });
     }
 
-    switchRoom = (newRoom) => {
-        socket.emit("leave", this.state.currentFilename);
-        socket.emit("join", newRoom);
-    }
-
+    /**
+     * Either render or close the RegisterModal component
+     *
+     * @param {string} action  String representing the action to open or close
+     */
     registerModal = (action) => {
 
         if (action === "open") {
@@ -362,6 +459,14 @@ class App extends React.Component {
         );
     }
 
+    /**
+     * Send a server request to register a new user
+     *
+     * @param {object} data             Object containing:
+     * @param {string} data.email       The e-mail entered
+     * @param {string} data.name        The name entered
+     * @param {string} data.password    The password entered
+     */
     registerUser = (data) => {
         let params = {
             email: data.email,
@@ -376,6 +481,13 @@ class App extends React.Component {
         );
     }
 
+    /**
+     * Set flash message to confirm that a user has been registered
+     *
+     * @param {object} data                 Data received from the request:
+     * @param {boolean} data.acknowledged Successful request = true
+     * @param {string}  data.insertedId   The objectid of the new user
+     */
     afterRegisterUser = (data) => {
         this.setFlashMessage({
             text: "User succesfully registered. Ready to log in!",
@@ -383,8 +495,13 @@ class App extends React.Component {
         });
     }
 
+    /**
+     * Either render or close the LoginModal component
+     *
+     * @param {string} action  String representing the action to open or close
+     */
     loginModal = (action) => {
-        //If something is stored in token, click means logout
+        /** If something is stored in token, click means logout */
         if (this.state.token.length > 0) {
             this.clearStateAfterLogout();
             return;
@@ -407,6 +524,11 @@ class App extends React.Component {
         );
     }
 
+    /**
+     * Either render (and make a server request) or close the ShareModal component
+     *
+     * @param {string} action  String representing the action to open or close
+     */
     shareModal = (action) => {
         if (action === "open") {
             let params = {
@@ -426,6 +548,12 @@ class App extends React.Component {
         );
     }
 
+    /**
+     * Call ReactDOM.render to render the ShareModal component
+     *
+     * @param {object} data              Data received from a server request:
+     * @param {array} data.data.users    Array of all users' e-mail addresses
+     */
     openShareModal = (data) => {
         let allUsers = data.data.users;
 
@@ -442,6 +570,11 @@ class App extends React.Component {
         )
     }
 
+    /**
+     * Send a server request to set the array of allowed users to data
+     *
+     * @param {array} data  New array of e-mail addresses of allowed users
+     */
     updateUsers = (data) => {
         let params = {
             token: this.state.token,
@@ -456,6 +589,13 @@ class App extends React.Component {
         );
     }
 
+    /**
+     * Handle result of updating array of allowed users in the database, save
+     * the updated array to state
+     *
+     * @param {object} data                Data received from server request:
+     * @param {boolean} data.allowedusers  Updated array of allowed users
+     */
     afterUpdateUsers = (data) => {
         this.setState({
             currentAllowedUsers: data.allowedusers,
@@ -466,30 +606,9 @@ class App extends React.Component {
         });
     }
 
-    sendInvite = (recipient) => {
-        let params = {
-            token: this.state.token,
-            recipient: recipient,
-            inviterName: this.state.currentUserName,
-            inviterEmail: this.state.currentUserEmail,
-            filename: this.state.currentFilename,
-            title: this.state.currentTitle
-        };
-        backend(
-            "sendinvite",
-            ENDPOINT,
-            this.afterInvite,
-            params
-        );
-    }
-
-    afterInvite = (data) => {
-        this.setFlashMessage({
-            text: "Invite sent.",
-            type: "ok"
-        });
-    }
-
+    /**
+     * Set most of the state to its original values after logging out
+     */
     clearStateAfterLogout = () => {
         this._isSaved = false;
         this.setState({
@@ -512,6 +631,12 @@ class App extends React.Component {
         });
     }
 
+    /**
+     * Receive input from login attempt and send to server for verification
+     *
+     * @param {string} email    Entered e-mail address
+     * @param {string} password Entered password
+     */
     loginAttempt = (email, password) => {
         let params = {
             email: email,
@@ -525,9 +650,20 @@ class App extends React.Component {
         );
     }
 
+    /**
+     * Handle result of login attempt. Set state to represent succesful or
+     * unsuccesful login
+     *
+     * @param {object} data              Data received from server request:
+     * @param {boolean} data.userexists  True/false if user exists/not
+     * @param {boolean} data.verified    True/false if password correct/not
+     * @param {string} data.token        JSON web token
+     * @param {email} data.email         E-mail address of logged in user
+     * @param {email} data.name          Name of logged in user
+     */
     afterLoginAttempt = (data) => {
         if (data.userexists && data.verified) {
-            // Saves token in state if login is successful
+            /** Saves token in state if login is successful */
             this.setState({
                 token: data.token,
                 currentUserEmail: data.email,
@@ -569,27 +705,18 @@ class App extends React.Component {
         return;
     }
 
-    handlePdfPrint = () => {
-        pdfPrint(
-            this.state.currentTitle,
-            this.state.currentContent,
-            ENDPOINT
-        );
-    }
-
+    /**
+     * Toggle between code mode and normal text mode, clears most of the state
+     */
     toggleCodeMode = () => {
-        // Set codeMode to opposite value of the current value
+        /** Set codeMode to opposite value of the current value */
         let codeMode = !this.state.codeMode;
 
-        let msgText;
+        let msgText = "Switched to text mode.";
 
-        if (codeMode) {
-            msgText = "Switched to code mode.";
-        } else {
-            msgText = "Switched to text mode.";
-        }
+        if (codeMode) { msgText = "Switched to code mode."; }
 
-        // Clear all state except login details: user email, name and token
+        /** Clear all state except login details: user email, name and token */
         this._isSaved = false;
         this.setState({
             codeMode: codeMode,
@@ -625,15 +752,22 @@ class App extends React.Component {
         });
     }
 
-    // Adds a comment to comments list
+    /**
+     * Set currentComments to the received array
+     *
+     * @param {array} allComments Array of comments received from the
+     * CommentBox component
+     */
     addCommentToDropDown = (allComments) => {
         this.setState({
             currentComments: allComments
         });
-
         return;
     }
 
+    /**
+     * Toggle hide/show comments
+     */
     toggleShowComments = () => {
         this.setState({
             hideComments: !this.state.hideComments
@@ -642,9 +776,14 @@ class App extends React.Component {
         });
     }
 
-    // Removes any comments not found in document from comments array
+    /**
+     * Remove any comments not found in document from comments array, save
+     * to state
+     *
+     * @param {function} callback  Callback function, after state has been set
+     */
     cleanUpComments = (callback) => {
-        // Make callback param optional
+        /** Make callback param optional */
         callback = callback || function(){};
 
         let comments = this.state.currentComments;
@@ -662,6 +801,9 @@ class App extends React.Component {
         }, () => { callback(); });
     }
 
+    /**
+     * Toggle hide/show for all comment img tags in the document
+     */
     toggleCommentsCallback = () => {
         let comments = this.state.currentComments;
         let commentNode;
@@ -672,10 +814,44 @@ class App extends React.Component {
         });
     }
 
-    setFlashMessage = (message={ text: "", type: "hidden" }) => {
-        this.setState({ message: message });
+    /**
+     * Send invite and update allowedUsers array for the current document
+     *
+     * @param   {string} recipient  E-mail address of recipient
+     */
+    sendInvite = (recipient) => {
+        let params = {
+            token: this.state.token,
+            recipient: recipient,
+            inviterName: this.state.currentUserName,
+            inviterEmail: this.state.currentUserEmail,
+            filename: this.state.currentFilename,
+            title: this.state.currentTitle
+        };
+        backend(
+            "sendinvite",
+            ENDPOINT,
+            this.afterInvite,
+            params
+        );
     }
 
+    /**
+     * Set message for the flash message box
+     *
+     * @param   {object} data               Result:
+     * @param   {boolean} data.inviteSent   True/false if successful/unsuccesful
+     */
+    afterInvite = (data) => {
+        this.setFlashMessage({
+            text: "Invite sent.",
+            type: "ok"
+        });
+    }
+
+    /**
+     * Send currentContent to the code API for parsing, after conversion to base64
+     */
     executeCode = () => {
         let base64code = btoa(this.state.currentContent);
         let params = {
@@ -690,6 +866,12 @@ class App extends React.Component {
         return;
     }
 
+    /**
+     * Set state for code output after receving the output from the code API
+     *
+     * @param   {object} data               Result:
+     * @param   {object} data.data          Output as base64 coded string
+     */
     afterExecuteCode = (data) => {
         let result = atob(data.data);
         this.setState({
@@ -699,6 +881,57 @@ class App extends React.Component {
                 type: "ok"
             }
         });
+    }
+
+    /**
+     * Send current document title and content to pdfPrint function.
+     */
+    handlePdfPrint = () => {
+        pdfPrint(
+            this.state.currentTitle,
+            this.state.currentContent,
+            ENDPOINT
+        );
+    }
+
+    /**
+     * Check if stringToValidate passes the regex check
+     *
+     * @param   {string} type               Type of regex check
+     * @param   {string} stringToValidate   String to validate
+     * @return  {boolean} isValid           True or false for valid/invalid
+     */
+    regexCheck = (type, stringToValidate) => {
+        let expressions = {};
+
+        expressions.filename = /^[a-zA-Z0-9_]*$/;
+        expressions.email = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+        const check = new RegExp(expressions[type]);
+        const isValid = check.test(stringToValidate);
+
+        return isValid;
+    }
+
+    /**
+     * Emit new room name = the filename being switched to, over web socket
+     *
+     * @param   {string} newRoom New filename
+     */
+    switchRoom = (newRoom) => {
+        socket.emit("leave", this.state.currentFilename);
+        socket.emit("join", newRoom);
+    }
+
+    /**
+     * Set state for the flash message box
+     *
+     * @param   {object} message            Message:
+     * @param   {string} message.text       Message text
+     * @param   {object} message.type       Message type
+     */
+    setFlashMessage = (message={ text: "", type: "hidden" }) => {
+        this.setState({ message: message });
     }
 
     renderTinyMCE = () => {
