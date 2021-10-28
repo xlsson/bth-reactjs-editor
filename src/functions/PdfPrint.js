@@ -1,3 +1,11 @@
+/**
+ * Create a HTML string using title and content, and send server request to
+ * create a PDF file to print document.
+ *
+ * @param   {string} title       Document title
+ * @param   {string} content     Document contents
+ * @param   {string} baseUrl     Base URL to server
+ */
 function pdfPrint(title, content, baseUrl) {
     let html, header, body, footer;
 

@@ -1,3 +1,11 @@
+/**
+ * Backend function to handle server request calls
+ *
+ * @param   {string} request    Request name
+ * @param   {string} baseUrl    Base URL to server
+ * @param   {function} callback Function to call after finished request
+ * @param   {object} params     Object of parameters
+ */
 function backend(request, baseUrl, callback, params = {}) {
     let url = `${baseUrl}/graphql`;
     let requestOptions = {
@@ -155,6 +163,14 @@ function backend(request, baseUrl, callback, params = {}) {
     return;
 }
 
+/**
+ * Request function to send a server request
+ *
+ * @param   {string} url                URL for server request
+ * @param   {function} callback         Function to call after finished request
+ * @param   {object} requestOptions     Object of request options
+ * @return  {object} data               Result of server request as JSON object
+ */
 function sendRequest(url, callback, requestOptions) {
     fetch(url, requestOptions)
         .then(response => response.json())

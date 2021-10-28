@@ -1,5 +1,10 @@
 import React from 'react';
 
+/**
+ * InviteFriend component for displaying the invite friend input field
+ *
+ * @component
+ */
 class InviteFriend extends React.Component {
     render() {
         return (

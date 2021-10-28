@@ -1,6 +1,16 @@
 import React from 'react';
 
+/**
+ * FilesDropDown component for showing a dropdown menu of currently available files
+ *
+ * @component
+ */
 class FilesDropDown extends React.Component {
+
+    /**
+     * Handle change in dropdown selection
+     * @param  {object} e   Event object
+     */
     handleChange = (e) => {
         let i = e.target.value;
         let filename = this.props.availableFiles[i].filename;

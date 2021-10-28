@@ -1,5 +1,9 @@
 import React from 'react';
 
+/**
+ * ErrorBox component for showing errors in modals
+ * @component
+ */
 class ErrorBox extends React.Component {
     render() {
         return (

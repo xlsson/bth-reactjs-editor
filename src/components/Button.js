@@ -1,5 +1,10 @@
 import React from 'react';
 
+/**
+ * Button component buttons
+ *
+ * @component
+ */
 class Button extends React.Component {
     render() {
         let classes = `button ${this.props.classes}`;

@@ -1,6 +1,15 @@
 import React from 'react';
 
+/**
+ * HeaderIcon component for displaying a header icon
+ *
+ * @component
+ */
 class HeaderIcon extends React.Component {
+
+    /**
+     * Handle click on icon, call props.onClick() if props.active is true
+     */
     handleClick = () => {
         if (this.props.active) {
             this.props.onClick();

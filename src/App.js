@@ -24,8 +24,8 @@ import 'codemirror/theme/neo.css';
 require('codemirror/mode/javascript/javascript');
 
 /**
- * @type {String} ENDPOINT -    Base URL for the server
- * @type {Object} socket -      socketIOClient instance
+ * @type {string} ENDPOINT -    Base URL for the server
+ * @type {object} socket -      socketIOClient instance
  */
 const ENDPOINT = "https://jsramverk-editor-riax20.azurewebsites.net";
 const socket = socketIOClient(ENDPOINT);
@@ -34,39 +34,39 @@ const socket = socketIOClient(ENDPOINT);
  * App class = root component for the CirrusDocs app
  *
  * @component
- * @member {Boolean} _isMounted -               True if the component is mounted
- * @member {Boolean} _isFromRemote -            True if input comes from web socket
- * @member {Boolean} _isSave -                  True if document is already saved in the db
- * @member {Object} _editor -                   TinyMCE editor instance
+ * @member {boolean} _isMounted -               True if the component is mounted
+ * @member {boolean} _isFromRemote -            True if input comes from web socket
+ * @member {boolean} _isSave -                  True if document is already saved in the db
+ * @member {object} _editor -                   TinyMCE editor instance
  *
- * @member {Object} state -                     State:
- * @member {String} state.token -               JSON web token
- * @member {String} state.currentUserName -     User name of logged in user
- * @member {String} state.currentUserEmail -    Email of logged in user
- * @member {String} state.currentFilename -     Filename of currently opened document
- * @member {String} state.currentOwnerName -    Owner name of currently opened document
- * @member {String} state.currentOwnerEmail -   Owner e-mail of currently opened document
- * @member {String} state.currentTitle -        Title of currently opened document
- * @member {String} state.currentContent -      Content of currently opened document
- * @member {Array} state.currentAllowedUsers -  Array of users with editing rights
+ * @member {object} state -                     State:
+ * @member {string} state.token -               JSON web token
+ * @member {string} state.currentUserName -     User name of logged in user
+ * @member {string} state.currentUserEmail -    Email of logged in user
+ * @member {string} state.currentFilename -     Filename of currently opened document
+ * @member {string} state.currentOwnerName -    Owner name of currently opened document
+ * @member {string} state.currentOwnerEmail -   Owner e-mail of currently opened document
+ * @member {string} state.currentTitle -        Title of currently opened document
+ * @member {string} state.currentContent -      Content of currently opened document
+ * @member {array} state.currentAllowedUsers -  Array of users with editing rights
  *                                              for the currently opened document
- * @member {String} state.selectedFile -        The file last selected in the dropdown
- * @member {Array} state.allowedDocs -          An array of all files where the
+ * @member {string} state.selectedFile -        The file last selected in the dropdown
+ * @member {array} state.allowedDocs -          An array of all files where the
  *                                              logged in user has editing rights, for
  *                                              the current mode (code or text)
- * @member {Boolean} state.activateShareIcon -  True if the user is allowed to
+ * @member {boolean} state.activateShareIcon -  True if the user is allowed to
  *                                              manage editing rights
- * @member {Boolean} state.codeMode -           True = code mode, false = text mode
- * @member {Boolean} state.hideComments -       True = comments are displayed,
+ * @member {boolean} state.codeMode -           True = code mode, false = text mode
+ * @member {boolean} state.hideComments -       True = comments are displayed,
  *                                              false = comments are hidden
- * @member {String} state.codeOutput -          Result of sending code to the
+ * @member {string} state.codeOutput -          Result of sending code to the
  *                                              code API
- * @member {Array} state.currentComments -      Array with all comments for the
+ * @member {array} state.currentComments -      Array with all comments for the
  *                                              current document.
- * @member {String} state.accountLinkText -     The link text for the account icon
- * @member {Object} state.message -             Message for the flash message box:
- * @member {String} state.message.text -        Text for the flash message box
- * @member {String} state.message.type -        Type of message = displayed
+ * @member {string} state.accountLinkText -     The link text for the account icon
+ * @member {object} state.message -             Message for the flash message box:
+ * @member {string} state.message.text -        Text for the flash message box
+ * @member {string} state.message.type -        Type of message = displayed
  *                                              green/red/hidden
  */
 class App extends React.Component {

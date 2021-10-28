@@ -1,7 +1,16 @@
 import React from 'react';
 
+/**
+ * TextInputField component to display a text input field with title
+ *
+ * @component
+ */
 class TextInputField extends React.Component {
 
+    /**
+     * Handle change in text input field
+     * @param  {object} e      Event object
+     */
     handleChange = (e) => {
         this.props.onChange(e.target.value, this.props.name);
     }

@@ -1,5 +1,10 @@
 import React from 'react';
 
+/**
+ * FlashMessage component for showing flash messages
+ *
+ * @component
+ */
 class FlashMessage extends React.Component {
 
     render() {

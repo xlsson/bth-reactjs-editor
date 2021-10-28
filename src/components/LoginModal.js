@@ -3,6 +3,17 @@ import TextInputField from './TextInputField.js';
 import ErrorBox from './ErrorBox.js';
 import Button from './Button.js';
 
+/**
+ * LoginModal component for displaying the login modal
+ *
+ * @component
+ *
+ * @member {object}  state -          State:
+ * @member {string}  state.email -    E-mail for user wanting to log in
+ * @member {string}  state.password - Password for user wanting to log in
+ * @member {boolean} state.errors -   True = errors are present, false = no errors
+ * @member {array}   state.messages - Array of error messages (strings)
+ */
 class LoginModal extends React.Component {
     constructor(props) {
         super(props);
@@ -15,15 +26,25 @@ class LoginModal extends React.Component {
         }
     }
 
+    /**
+     * Close this modal and open register modal, by calling props methods
+     */
     registerInstead = () => {
         this.props.loginModal("close");
         this.props.registerModal("open");
     }
 
+    /**
+     * Close this modal
+     */
     cancel = () => {
         this.props.loginModal("close");
     }
 
+    /**
+     * Handle click on confirm button. Check for errors and either close or
+     * display an error message box.
+     */
     confirm = () => {
         let email = this.state.email;
         let emailIsValid = this.props.regexCheck("email", email);
@@ -53,6 +74,11 @@ class LoginModal extends React.Component {
         });
     }
 
+    /**
+     * Handle change in text input fields
+     * @param  {object} ev      Event object
+     * @param  {string} field   Field where a change was recorded
+     */
     handleTextInputChange = (ev, field) => {
         if (field === "email") {
             this.setState({

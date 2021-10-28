@@ -1,7 +1,15 @@
 import React from 'react';
 
+/**
+ * CodeModeBox component for toggling code mode
+ *
+ * @component
+ */
 class CodeModeBox extends React.Component {
 
+    /**
+     * Call props.execute() function to execute the code
+     */
     execute = () => {
         if (this.props.active) {
             this.props.execute();

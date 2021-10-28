@@ -3,6 +3,18 @@ import ErrorBox from './ErrorBox.js';
 import TextInputField from './TextInputField.js';
 import Button from './Button.js';
 
+/**
+ * RegisterModal component for displaying the register modal
+ *
+ * @component
+ *
+ * @member {object}  state -          State:
+ * @member {string}  state.email -    E-mail for user wanting to register
+ * @member {string}  state.name -     Name for user wanting to register
+ * @member {string}  state.password - Password for user wanting to register
+ * @member {boolean} state.errors -   True = errors are present, false = no errors
+ * @member {array}   state.messages - Array of error messages (strings)
+ */
 class RegisterModal extends React.Component {
     constructor(props) {
         super(props);
@@ -16,15 +28,25 @@ class RegisterModal extends React.Component {
         };
     }
 
+    /**
+     * Close this modal and open login modal, by calling props methods
+     */
     loginInstead = () => {
         this.props.registerModal("close");
         this.props.loginModal("open");
     }
 
+    /**
+     * Close this modal
+     */
     cancel = () => {
         this.props.registerModal("close");
     }
 
+    /**
+     * Handle click on confirm button. Check for errors and either close or
+     * display an error message box.
+     */
     confirm = () => {
         let email = this.state.email;
         let emailIsValid = this.props.regexCheck("email", email);
@@ -63,6 +85,11 @@ class RegisterModal extends React.Component {
         });
     }
 
+    /**
+     * Handle change in text input fields
+     * @param  {object} ev      Event object
+     * @param  {string} field   Field where a change was recorded
+     */
     handleTextInputChange = (ev, field) => {
         if (field === "email") {
             this.setState({

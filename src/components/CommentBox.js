@@ -2,6 +2,13 @@ import React from 'react';
 
 const textToImage = require('text-to-image');
 
+/**
+ * CommentBox component for handling comments
+ *
+ * @component
+ * @member {object} state -          State members:
+ * @member {string} currentComment - Represents the currently entered comment
+ */
 class CommentBox extends React.Component {
     constructor(props) {
         super(props);
@@ -12,6 +19,16 @@ class CommentBox extends React.Component {
 
     }
 
+    /**
+     * Handle click on add comment icon:
+     * Call addCommentToArray() to add comment to comment array.
+     * Create a new comment id by getting the current highest id.
+     * Call textToImage to create a data URI image.
+     * Create a comment HTML tag with the image.
+     * Call props.addCommentToDropDown() to add comment to dropdown array.
+     * @async
+     *
+     */
     addComment = async () => {
         if (this.props.codeMode) { return; };
 
@@ -56,6 +73,14 @@ class CommentBox extends React.Component {
         return;
     }
 
+    /**
+     * Create a new comment tag.
+     *
+     * @param  {string} commentId   Unique comment id
+     * @param  {string} image       Image as a data URI
+     * @return {string} commentTag  Comment tag with the image
+     *
+     */
     createCommentTag = (commentId, image) => {
         let hidden = ``;
         if (this.props.commentsAreHidden) { hidden = `hidden="true"`; }
@@ -65,6 +90,12 @@ class CommentBox extends React.Component {
         return commentTag;
     }
 
+    /**
+     * Add a comment object to the props.comments array.
+     *
+     * @param  {string} commentText Comment text.
+     * @return {array} allComments  Array of all comment objects.
+     */
     addCommentToArray = (commentText) => {
         let allComments = this.props.comments;
         let comment = { nr: 1, text: commentText };
@@ -78,12 +109,19 @@ class CommentBox extends React.Component {
         return allComments;
     }
 
+    /**
+     * Toggle props.codeMode by calling props.toggleShowComments()
+     */
     toggleShowComments = () => {
         if (!this.props.codeMode) {
             this.props.toggleShowComments();
         }
     }
 
+    /**
+     * Handle change in comment text field
+     * @param  {object} e   Event object
+     */
     handleCommentChange = (e) => {
         let commentText = e.target.value;
         this.setState({
@@ -91,6 +129,10 @@ class CommentBox extends React.Component {
         });
     }
 
+    /**
+     * Handle click on dropdown = call cleanUpComments() on every click
+     * @param  {object} e   Event object
+     */
     handleSelectClick = (e) => {
         this.props.cleanUpComments();
     }
