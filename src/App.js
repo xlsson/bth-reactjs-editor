@@ -580,12 +580,15 @@ class App extends React.Component {
     toggleCodeMode = () => {
         // Set codeMode to opposite value of the current value
         let codeMode = !this.state.codeMode;
+
         let msgText;
+
         if (codeMode) {
             msgText = "Switched to code mode.";
         } else {
             msgText = "Switched to text mode.";
         }
+
         // Clear all state except login details: user email, name and token
         this._isSaved = false;
         this.setState({

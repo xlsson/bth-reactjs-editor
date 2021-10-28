@@ -402,23 +402,21 @@ tr.share:nth-child(even) {
     margin: 0;
 }
 
-.status-label {
-    font-size: 0.8em;
-    line-height: 1em;
-    color: #777;
-    text-align: right;
-    padding: 0 0 0.2em 0.5em;
-    margin: 0;
+table.status-field {
+    border-collapse: collapse;
 }
 
-.status-info {
-    font-size: 0.8em;
-    line-height: 1em;
+tr.status-field,
+td.status-field {
+    font-size: 0.9em;
     color: #777;
-    text-align: left;
+    border-collapse: collapse;
+    padding: 0.2em 0.3em;
+}
+
+td.status-field:nth-child(even) {
     font-weight: bold;
-    padding: 0 0 0.2em 0.5em;
-    margin: 0;
+    min-width: 240px;
 }
 
 .select,
