@@ -50,8 +50,6 @@ body {
     left: 0;
 }
 
-
-
 .modal-box {
     margin: 30vh auto;
     box-shadow: 0 4px 8px 0 rgba(0,0,0,0.3), 0 3px 10px 0 rgba(0,0,0,0.19);
@@ -68,9 +66,16 @@ body {
 
 .modal-textlink {
     text-decoration: underline;
-    margin: 0;
+    margin: 0.5em 0 0 0;
     padding: 0;
     cursor: pointer;
+}
+
+.modal-title {
+    font-weight: bold;
+    margin: 0 0 0.6em 0;
+    padding: 0 0 0.3em 0;
+    border-bottom: 1px solid #ccc;
 }
 
 .logo {
@@ -160,7 +165,7 @@ body {
 }
 
 table.share {
-    margin: 0 0 1em;
+    margin: 0;
     min-width: 240px;
 }
 

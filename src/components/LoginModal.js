@@ -84,6 +84,7 @@ class LoginModal extends React.Component {
                 <div className="flex-row justify-content-center">
                     <div className="modal-box flex-column">
                         <>
+                        <div className="modal-title">Log in</div>
                         <TextInputField
                             elementId="emailInputField"
                             label="Username (e-mail):"

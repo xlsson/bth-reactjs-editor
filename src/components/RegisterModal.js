@@ -101,6 +101,7 @@ class RegisterModal extends React.Component {
                     <div className="modal-wrapper flex-row">
                         <div className="modal-box flex-column">
                             <>
+                            <div className="modal-title">Register</div>
                             <TextInputField
                                 elementId="email-input-field"
                                 label="Username (e-mail):"

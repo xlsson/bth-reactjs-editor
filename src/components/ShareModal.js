@@ -163,17 +163,9 @@ class ShareModal extends React.Component {
                 <div className="modal-wrapper flex-row">
                     <div className="modal-box flex-column">
                         <>
+                        <div className="modal-title">Manage editing rights</div>
                         <table className="share">
                             <>
-                            <thead>
-                                <tr className="share">
-                                    <>
-                                        <th className="share textalignleft" colSpan="2">
-                                            Manage editing rights
-                                        </th>
-                                    </>
-                                </tr>
-                            </thead>
                             <tbody>
                             {this.state.users.map((user, i) => (
                                 <>
