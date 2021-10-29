@@ -27,7 +27,8 @@ require('codemirror/mode/javascript/javascript');
  * @type {string} ENDPOINT -    Base URL for the server
  * @type {object} socket -      socketIOClient instance
  */
-const ENDPOINT = "https://jsramverk-editor-riax20.azurewebsites.net";
+const ENDPOINT = "http://localhost:1234";
+// const ENDPOINT = "https://jsramverk-editor-riax20.azurewebsites.net";
 const socket = socketIOClient(ENDPOINT);
 
 /**
@@ -493,11 +494,19 @@ class App extends React.Component {
     /**
      * Set flash message to confirm that a user has been registered
      *
-     * @param {object} data                 Data received from the request:
+     * @param {object} data               Data received from the request:
      * @param {boolean} data.acknowledged Successful request = true
      * @param {string}  data.insertedId   The objectid of the new user
      */
     afterRegisterUser = (data) => {
+        if (data.acknowledged === false) {
+            this.setFlashMessage({
+                text: "User already exists, log in instead.",
+                type: "error"
+            });
+            return;
+        }
+
         this.setFlashMessage({
             text: "User succesfully registered. Ready to log in!",
             type: "ok"
