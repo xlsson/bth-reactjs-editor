@@ -27,8 +27,8 @@ require('codemirror/mode/javascript/javascript');
  * @type {string} ENDPOINT -    Base URL for the server
  * @type {object} socket -      socketIOClient instance
  */
-const ENDPOINT = "http://localhost:1234";
-// const ENDPOINT = "https://jsramverk-editor-riax20.azurewebsites.net";
+
+const ENDPOINT = "https://jsramverk-editor-riax20.azurewebsites.net";
 const socket = socketIOClient(ENDPOINT);
 
 /**
@@ -38,9 +38,9 @@ const socket = socketIOClient(ENDPOINT);
  * @member {boolean} _isMounted -               True if the component is mounted
  * @member {boolean} _isFromRemote -            True if input comes from web socket
  * @member {boolean} _isSave -                  True if document is already saved in the db
- * @member {object} _editor -                   TinyMCE editor instance
  *
  * @member {object} state -                     State:
+ * @member {object} editor -                    TinyMCE editor instance
  * @member {string} state.token -               JSON web token
  * @member {string} state.currentUserName -     User name of logged in user
  * @member {string} state.currentUserEmail -    Email of logged in user
@@ -77,9 +77,9 @@ class App extends React.Component {
         this._isMounted = false;
         this._isFromRemote = false;
         this._isSaved = false;
-        this._editor = null;
 
         this.state = {
+            editor: null,
             token: '',
             currentUserName: '',
             currentUserEmail: '',
@@ -828,7 +828,7 @@ class App extends React.Component {
         let commentNode;
 
         comments.forEach((comment, i) => {
-            commentNode = this._editor.dom.get(`comment${comment.nr}`);
+            commentNode = this.state.editor.dom.get(`comment${comment.nr}`);
             if (commentNode) { commentsNew.push(comment); }
         });
 
@@ -845,7 +845,7 @@ class App extends React.Component {
         let commentNode;
 
         comments.forEach((comment, i) => {
-            commentNode = this._editor.dom.get(`comment${comment.nr}`);
+            commentNode = this.state.editor.dom.get(`comment${comment.nr}`);
             commentNode.hidden = this.state.hideComments;
         });
     }
@@ -1003,7 +1003,11 @@ class App extends React.Component {
                             'searchreplace visualblocks code',
                             'insertdatetime media table paste wordcount'],
                         toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright | bullist numlist outdent indent | help',
-                        setup: (editor) => { this._editor = editor; }
+                        setup: (editor) => {
+                            this.setState({
+                                editor: editor
+                            });
+                        }
                     }}
                     onEditorChange={(ev) => this.handleTextInputChange(ev, "content")}/>
             </div>
@@ -1115,7 +1119,7 @@ class App extends React.Component {
                 <div className="toolbar">
                     <>
                     <CommentBox
-                        editor={this._editor}
+                        editor={this.state.editor}
                         content={this.state.currentContent}
                         comments={this.state.currentComments}
                         commentsAreHidden={this.state.hideComments}
