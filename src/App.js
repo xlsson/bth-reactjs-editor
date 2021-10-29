@@ -27,7 +27,8 @@ require('codemirror/mode/javascript/javascript');
  * @type {string} ENDPOINT -    Base URL for the server
  * @type {object} socket -      socketIOClient instance
  */
-const ENDPOINT = "https://jsramverk-editor-riax20.azurewebsites.net";
+const ENDPOINT = "http://localhost:1234";
+// const ENDPOINT = "https://jsramverk-editor-riax20.azurewebsites.net";
 const socket = socketIOClient(ENDPOINT);
 
 /**
@@ -364,6 +365,7 @@ class App extends React.Component {
      *
      * @param {object} data  Data from server request response:
      * @param {boolean} data.tokenNotValid    User's token is valid = true
+     * @param {boolean} data.notAllowed       User is not authorized = true
      * @param {boolean} data.acknowledged     Successful operation = true
      * @param {number}  data.modifiedCount    Number of modified records (always 1)
      * @param {null}    data.upsertedId       Id of upserted record (always null)
@@ -374,6 +376,14 @@ class App extends React.Component {
         if (data.tokenNotValid) {
             this.setFlashMessage({
                 text: "Token invalid. Session has expired/false token.",
+                type: "error"
+            });
+            return;
+        }
+
+        if (data.notAllowed) {
+            this.setFlashMessage({
+                text: "Error: user not authorized to edit.",
                 type: "error"
             });
             return;
@@ -593,10 +603,28 @@ class App extends React.Component {
      * Handle result of updating array of allowed users in the database, save
      * the updated array to state
      *
-     * @param {object} data                Data received from server request:
-     * @param {boolean} data.allowedusers  Updated array of allowed users
+     * @param {object} data                   Data received from server request:
+     * @param {boolean} data.tokenNotValid    User's token is valid = true
+     * @param {boolean} data.notAllowed       User is not authorized = true
+     * @param {boolean} data.allowedusers     Updated array of allowed users
      */
     afterUpdateUsers = (data) => {
+        if (data.tokenNotValid) {
+            this.setFlashMessage({
+                text: "Token invalid. Session has expired/false token.",
+                type: "error"
+            });
+            return;
+        }
+
+        if (data.notAllowed) {
+            this.setFlashMessage({
+                text: "Error: user not authorized to edit.",
+                type: "error"
+            });
+            return;
+        }
+
         this.setState({
             currentAllowedUsers: data.allowedusers,
             message: {
