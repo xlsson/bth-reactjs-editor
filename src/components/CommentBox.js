@@ -46,8 +46,8 @@ class CommentBox extends React.Component {
 
         let image = await textToImage.generate(`${commentId}`, {
             maxWidth: 20,
-            customHeight: 12,
-            fontSize: 14,
+            customHeight: 16,
+            fontSize: 11,
             fontFamily: 'monospace',
             fontWeight: 'bold',
             lineHeight: 0,
@@ -137,6 +137,28 @@ class CommentBox extends React.Component {
         this.props.cleanUpComments();
     }
 
+    /** Unclickable placeholder without id before editor instance is there,
+     * to prevent error
+     */
+    renderPlaceholderButton = () => {
+        return (
+            <p
+                className={`material-icons comment-icon inactive-icon`}>add</p>
+        );
+    }
+
+    renderAddCommentButton = () => {
+        let inactiveIcon = "";
+
+        if (this.props.codeMode) {  inactiveIcon = "inactive-icon"; }
+        return (
+            <p
+                id="comment-submit-icon"
+                className={`material-icons comment-icon ${inactiveIcon}`}
+                onClick={this.addComment}>add</p>
+        );
+    }
+
     render() {
         let inactiveIcon = "";
         let dropdownDisabled = false;
@@ -159,6 +181,9 @@ class CommentBox extends React.Component {
             eyeIcon = "visibility_off";
         }
 
+        let editorReady = false;
+        if (this.props.editor !== null) { editorReady = true; }
+
         return (
             <>
             <div className="flex-column">
@@ -173,10 +198,11 @@ class CommentBox extends React.Component {
             </div>
             <div className="flex-column">
                 <>
-                <p className="comment-title">Add comment at cursor</p>
+                <p className="comment-title">Add comment</p>
                 <div className="comment-wrapper flex-row">
                 <>
                     <input
+                        id="comment-input-field"
                         className="input input-comment"
                         type="text"
                         maxLength="30"
@@ -184,9 +210,8 @@ class CommentBox extends React.Component {
                         onChange={this.handleCommentChange}
                         disabled={inputDisabled}>
                     </input>
-                    <p
-                        className={`material-icons comment-icon ${inactiveIcon}`}
-                        onClick={this.addComment}>add</p>
+                    {!editorReady && this.renderPlaceholderButton()}
+                    {editorReady && this.renderAddCommentButton()}
                 </>
                 </div>
                 </>
@@ -196,6 +221,7 @@ class CommentBox extends React.Component {
                 <p className="comment-title">Comments list</p>
                 <div className="comment-wrapper flex-row">
                     <select
+                        id="comment-select-list"
                         className="select select-comment"
                         onClick={this.handleSelectClick}
                         disabled={dropdownDisabled}>
