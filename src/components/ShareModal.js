@@ -128,7 +128,7 @@ class ShareModal extends React.Component {
 
         /** Create the updated list of allowed users */
         users.forEach((user) => {
-            // If user already invited, don't add them to allowed users again
+            /** If user already invited, don't add them to allowed users again */
             if (user.email !== inviteEmail) {
                 if (user.checked) { updatedList.push(user.email); }
             };
