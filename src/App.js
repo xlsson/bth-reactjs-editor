@@ -866,10 +866,28 @@ class App extends React.Component {
     /**
      * Set message for the flash message box
      *
-     * @param   {object} data               Result:
-     * @param   {boolean} data.inviteSent   True/false if successful/unsuccesful
+     * @param   {object} data                 Result:
+     * @param   {boolean} data.inviteSent     True/false if successful/unsuccesful
+     * @param   {boolean} data.tokenNotValid  True/false if successful/unsuccesful
+     * @param   {boolean} data.notAllowed     True/false if successful/unsuccesful
      */
     afterInvite = (data) => {
+        if (data.tokenNotValid) {
+            this.setFlashMessage({
+                text: "Token invalid. Session has expired/false token.",
+                type: "error"
+            });
+            return;
+        }
+
+        if (data.notAllowed) {
+            this.setFlashMessage({
+                text: "Error: user not authorized to invite.",
+                type: "error"
+            });
+            return;
+        }
+
         this.setFlashMessage({
             text: "Invite sent.",
             type: "ok"
