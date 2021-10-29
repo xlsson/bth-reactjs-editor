@@ -27,8 +27,7 @@ require('codemirror/mode/javascript/javascript');
  * @type {string} ENDPOINT -    Base URL for the server
  * @type {object} socket -      socketIOClient instance
  */
-const ENDPOINT = "http://localhost:1234";
-// const ENDPOINT = "https://jsramverk-editor-riax20.azurewebsites.net";
+const ENDPOINT = "https://jsramverk-editor-riax20.azurewebsites.net";
 const socket = socketIOClient(ENDPOINT);
 
 /**
