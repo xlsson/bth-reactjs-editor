@@ -135,7 +135,6 @@ function backend(request, baseUrl, callback, params = {}) {
             body: JSON.stringify({
             recipient: params.recipient,
             inviterName: params.inviterName,
-            inviterEmail: params.inviterEmail,
             filename: params.filename,
             title: params.title
              })

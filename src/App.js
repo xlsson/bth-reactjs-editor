@@ -852,7 +852,6 @@ class App extends React.Component {
             token: this.state.token,
             recipient: recipient,
             inviterName: this.state.currentUserName,
-            inviterEmail: this.state.currentUserEmail,
             filename: this.state.currentFilename,
             title: this.state.currentTitle
         };
