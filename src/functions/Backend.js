@@ -73,7 +73,7 @@ function backend(request, baseUrl, callback, params = {}) {
                 content: params.content,
                 comments: params.comments
              })
-        };
+        }
         sendRequest(url, callback, requestOptions);
         return;
     }
