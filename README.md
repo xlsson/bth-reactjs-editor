@@ -1,10 +1,13 @@
 ![Github Actions](https://github.com/xlsson/bth-reactjs-editor/actions/workflows/node.js.yml/badge.svg)
 
-## CirrusDocs
+![CirrusDocs](https://github.com/xlsson/bth-reactjs-editor/blob/main/src/img/logo.png?raw=true)
+
 CirrusDocs is a single-page real-time collaborative document editor app, written in JavaScript utilising the React library. The app was created as a student project for the course JavaScript-based Web Frameworks at Blekinge Institute of Technology (BTH).
 
 The backend of the editor is served by an Express server written in Node.js:
 ([xlsson/bth-editor-server](https://github.com/xlsson/bth-editor-server)).
+
+![CirrusDocs](https://github.com/xlsson/bth-reactjs-editor/blob/main/src/img/screenshot.png?raw=true)
 
 ### Features
 
@@ -21,8 +24,6 @@ Switch between text mode and code mode. Code mode uses ([CodeMirror](https://www
 Documents can be converted to a PDF file for printing. The backend utilises ([html-pdf-node](https://www.npmjs.com/package/html-pdf-node)) for PDF conversion.
 
 Comments can be inserted and deleted in the documents. The comments can be hidden or shown. The technology behind this is a TinyMCE command to insert a node, and the ([text-to-image](https://www.npmjs.com/package/text-to-image)) package, which creates a data URI image with the current comment number.
-
-### Screenshots
 
 ### Installation
 
