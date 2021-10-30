@@ -2,7 +2,8 @@
 
 ![CirrusDocs](https://github.com/xlsson/bth-reactjs-editor/blob/main/src/img/logo.png?raw=true)
 
-CirrusDocs is a single-page real-time collaborative document editor app, written in JavaScript utilising the React library. The app was created as a student project for the course JavaScript-based Web Frameworks at Blekinge Institute of Technology (BTH).
+# bth-reactjs-editor
+Frontend for the the CirrusDocs app. CirrusDocs is a single-page real-time collaborative document editor app, written in JavaScript utilising the React library. The app was created as a student project for the course JavaScript-based Web Frameworks at Blekinge Institute of Technology (BTH).
 
 The backend of the editor is served by an Express server written in Node.js:
 ([xlsson/bth-editor-server](https://github.com/xlsson/bth-editor-server)).
@@ -25,6 +26,16 @@ Documents can be converted to a PDF file for printing. The backend utilises ([ht
 
 Comments can be inserted and deleted in the documents. The comments can be hidden or shown. The technology behind this is a TinyMCE command to insert a node, and the ([text-to-image](https://www.npmjs.com/package/text-to-image)) package, which creates a data URI image with the current comment number.
 
-### Installation
+### Installation instructions
+1. Follow the installation instructions for https://github.com/xlsson/bth-editor-server to install the necessary server and create the MongoDB database.
+
+2. Run `git clone https://github.com/xlsson/bth-reactjs-editor` to clone this repository.
+
+3. Run `npm install` to install the dependencies listed in `package.json`.
+
+4. Create a `./temppf` folder, for temporary PDF file storage.
+
+5. Create the JSON-files `.db/config.json` and `.db/testconfig.json`. `.db/config.json` should include the properties `username`, `password`, and `dbname` for your database, a random `jwtsecret` string used to create JSON web tokens, and two properties for SendGrid (for the e-mail sharing service): `sendgridsender` (e-mail address) and `sendgridsecret`. To get the last two properties, create a SendGrid account.
+
 
 ### Tests
