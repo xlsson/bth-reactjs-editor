@@ -10,7 +10,7 @@ The backend of the editor is served by an Express server written in Node.js:
 
 ![CirrusDocs](https://github.com/xlsson/bth-reactjs-editor/blob/main/src/img/screenshot.png?raw=true)
 
-### Featuress
+### Features
 At the heart of the app, CirrusDocs implements [TinyMCE](https://www.npmjs.com/package/@tinymce/tinymce-react) to create rich-text documents.
 
 Real-time collaboration is possible thanks to web sockets (through the [socket.io-client](https://www.npmjs.com/package/socket.io-client) package). Two or more users who have opened the same document can edit it simultaneously.
@@ -37,6 +37,8 @@ Comments can be inserted and deleted in the documents. The comments can be hidde
 5. Create the JSON-files `.db/config.json` and `.db/testconfig.json`. `.db/config.json` should include the properties `username`, `password`, and `dbname` for your database, a random `jwtsecret` string used to create JSON web tokens, and two properties for SendGrid (for the e-mail sharing service): `sendgridsender` (e-mail address) and `sendgridsecret`. To get the last two properties, create a SendGrid account.
 
 6. Point the `ENDPOINT` variable in `./src/App.js` to your server.
+
+7. Sign up for TinyMCE to get an api key, and add it to the apiKey attribute in the <TinyMCE> component. You will need to have added your domain to the list of approved domains at tiny.cloud for it to work.
 
 7. To generate a production build of the project in the `./build` folder, run `npm run build`. You can also use the command `npm run deploy`, to first generate a build, and then rsync to the specified destination (needs to be replaced by your destination). The command will delete files in the remote folder which are not present locally.
 
